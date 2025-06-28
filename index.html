@@ -1,197 +1,885 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Femtoc e-Learning Platform</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif;
-    }
-    body {
-      background: linear-gradient(135deg, #00c6ff, #0072ff);
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-    .container {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-      padding: 30px;
-      width: 100%;
-      max-width: 600px;
-      backdrop-filter: blur(10px);
-      text-align: center;
-    }
-    h2 {
-      font-size: 28px;
-      margin-bottom: 20px;
-    }
-    input[type="email"], input[type="password"], input[type="text"] {
-      width: 90%;
-      padding: 12px;
-      margin: 10px 0;
-      border: none;
-      border-radius: 8px;
-      outline: none;
-      font-size: 16px;
-    }
-    button {
-      background: #ffffff;
-      color: #0072ff;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      margin-top: 10px;
-      transition: 0.3s;
-    }
-    button:hover {
-      background: #00c6ff;
-      color: #fff;
-    }
-    .stats {
-      margin-top: 20px;
-    }
-    #admin-content table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    #admin-content th, #admin-content td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      background: rgba(255, 255, 255, 0.1);
-    }
-    #admin-content th {
-      background: rgba(0, 0, 0, 0.3);
-    }
-  </style>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getAuth,
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      setDoc,
-      getDoc,
-      updateDoc,
-      arrayUnion,
-      getDocs,
-      collection
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";const firebaseConfig = {
-  apiKey: "AIzaSyDXCbVzkuCbR4jBEbraDq80L-au3K2nV0M",
-  authDomain: "femtoc-app.firebaseapp.com",
-  projectId: "femtoc-app",
-  storageBucket: "femtoc-app.appspot.com",
-  messagingSenderId: "412251398391",
-  appId: "1:412251398391:web:2489e44512b87fff8ef3f2"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-const ADMIN_UID = "ADMIN123456";
-
-window.signUp = async function () {
-  const email = document.getElementById("signup-email").value;
-  const password = document.getElementById("signup-password").value;
-  const urlParams = new URLSearchParams(window.location.search);
-  const referredBy = urlParams.get("ref") || null;
-
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  const user = userCredential.user;
-  const referralCode = user.uid.slice(0, 6);
-
-  await setDoc(doc(db, "users", user.uid), {
-    uid: user.uid,
-    email,
-    referralCode,
-    referredBy,
-    referredUsers: [],
-    commission: 0,
-    coursesPurchased: []
-  });
-
-  if (referredBy) {
-    const refUserDoc = doc(db, "users", referredBy);
-    const refSnap = await getDoc(refUserDoc);
-    if (refSnap.exists()) {
-      await updateDoc(refUserDoc, {
-        referredUsers: arrayUnion(user.uid)
-      });
-    }
-  }
-}
-
-window.login = async function () {
-  const email = document.getElementById("login-email").value;
-  const password = document.getElementById("login-password").value;
-  await signInWithEmailAndPassword(auth, email, password);
-}
-
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    document.getElementById("login-section").style.display = "none";
-    const userRef = doc(db, "users", user.uid);
-    const docSnap = await getDoc(userRef);
-
-    if (user.uid === ADMIN_UID) {
-      document.getElementById("admin-panel").style.display = "block";
-      const allUsers = await getDocs(collection(db, "users"));
-      let html = "<h3>All Users</h3><table><tr><th>Email</th><th>Referrals</th><th>Commission</th></tr>";
-      allUsers.forEach(u => {
-        const d = u.data();
-        html += `<tr><td>${d.email}</td><td>${d.referredUsers.length}</td><td>₹${d.commission}</td></tr>`;
-      });
-      html += "</table>";
-      document.getElementById("admin-content").innerHTML = html;
-    } else {
-      document.getElementById("dashboard").style.display = "block";
-      const data = docSnap.data();
-      const referralLink = `${window.location.origin}?ref=${data.referralCode}`;
-      document.getElementById("user-email").innerText = data.email;
-      document.getElementById("ref-link").value = referralLink;
-      document.getElementById("ref-count").innerText = data.referredUsers.length;
-      document.getElementById("commission").innerText = data.commission;
-    }
-  }
-});
-
-  </script>
+    <title>Color Blast - Advanced Animated Game</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 450px;
+            height: 650px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+        }
+        
+        #gameCanvas {
+            display: block;
+        }
+        
+        #startScreen, #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.85);
+            color: white;
+            text-align: center;
+            z-index: 10;
+        }
+        
+        #gameOverScreen {
+            display: none;
+        }
+        
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #ff8a00, #e52e71);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+        
+        button {
+            padding: 15px 40px;
+            font-size: 1.3em;
+            background: linear-gradient(45deg, #ff8a00, #e52e71);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 5px 25px rgba(229, 46, 113, 0.5);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(229, 46, 113, 0.7);
+        }
+        
+        button:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        button:hover:before {
+            left: 100%;
+        }
+        
+        #scoreDisplay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 1.5em;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            z-index: 5;
+        }
+        
+        #timerDisplay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 1.5em;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            z-index: 5;
+        }
+        
+        #comboDisplay {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            color: #00ffaa;
+            font-size: 1.2em;
+            text-shadow: 0 0 10px rgba(0, 255, 170, 0.7);
+            z-index: 5;
+            display: none;
+        }
+        
+        #backgroundEffects {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            overflow: hidden;
+        }
+        
+        .powerup-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            font-size: 1.2em;
+            color: #00ffaa;
+            text-shadow: 0 0 10px rgba(0, 255, 170, 0.7);
+            z-index: 5;
+        }
+    </style>
 </head>
 <body>
-  <div class="container" id="login-section">
-    <h2>🔐 User Access</h2>
-    <input type="email" id="signup-email" placeholder="Email">
-    <input type="password" id="signup-password" placeholder="Password">
-    <button onclick="signUp()">Sign Up</button>
-    <hr style="margin: 20px 0; border: 1px dashed #ccc;">
-    <input type="email" id="login-email" placeholder="Email">
-    <input type="password" id="login-password" placeholder="Password">
-    <button onclick="login()">Login</button>
-  </div>  <div class="container" id="dashboard" style="display:none;">
-    <h2>📊 Your Dashboard</h2>
-    <p>Email: <strong><span id="user-email"></span></strong></p>
-    <p>Your Referral Link:</p>
-    <input type="text" id="ref-link" readonly>
-    <div class="stats">
-      <p>👥 People Joined: <span id="ref-count"></span></p>
-      <p>💰 Your Commission: ₹<span id="commission"></span></p>
+    <div id="backgroundEffects"></div>
+    
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="450" height="650"></canvas>
+        
+        <div id="startScreen">
+            <h1>COLOR BLAST</h1>
+            <p class="subtitle">Catch the colorful shapes to score points. Avoid the bombs! Collect powerups for special abilities.</p>
+            <button id="startButton">START ADVENTURE</button>
+        </div>
+        
+        <div id="gameOverScreen">
+            <h1>GAME OVER</h1>
+            <p id="finalScore" style="font-size: 1.8em; margin-bottom: 10px;">Score: 0</p>
+            <p id="highScore" style="font-size: 1.3em; color: #00ffaa; margin-bottom: 30px;">High Score: 0</p>
+            <button id="restartButton">PLAY AGAIN</button>
+        </div>
+        
+        <div id="scoreDisplay">SCORE: 0</div>
+        <div id="timerDisplay">TIME: 60</div>
+        <div id="comboDisplay">COMBO x1</div>
+        <div id="magnetIndicator" class="powerup-indicator">MAGNET ACTIVE!</div>
+        <div id="slowmoIndicator" class="powerup-indicator">SLOW MOTION!</div>
     </div>
-  </div>  <div class="container" id="admin-panel" style="display:none;">
-    <h2>👑 Admin Panel</h2>
-    <div id="admin-content">Loading users...</div>
-  </div>
+
+    <script>
+        // Game variables
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const startButton = document.getElementById('startButton');
+        const restartButton = document.getElementById('restartButton');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const comboDisplay = document.getElementById('comboDisplay');
+        const finalScore = document.getElementById('finalScore');
+        const highScore = document.getElementById('highScore');
+        const magnetIndicator = document.getElementById('magnetIndicator');
+        const slowmoIndicator = document.getElementById('slowmoIndicator');
+        const backgroundEffects = document.getElementById('backgroundEffects');
+        
+        let score = 0;
+        let highScoreValue = localStorage.getItem('highScore') || 0;
+        let timeLeft = 60;
+        let gameRunning = false;
+        let animationFrameId;
+        let timerId;
+        let objectSpawnInterval;
+        let comboCount = 0;
+        let comboMultiplier = 1;
+        let lastCaughtTime = 0;
+        let backgroundHue = 0;
+        
+        // Powerups
+        let magnetActive = false;
+        let magnetEndTime = 0;
+        let slowmoActive = false;
+        let slowmoEndTime = 0;
+        
+        // Player object
+        const player = {
+            x: canvas.width / 2 - 50,
+            y: canvas.height - 40,
+            width: 100,
+            height: 25,
+            color: '#4CAF50',
+            speed: 12,
+            dx: 0,
+            glow: 0,
+            glowDirection: 1
+        };
+        
+        // Falling objects
+        let fallingObjects = [];
+        const objectTypes = [
+            { color: '#FF5252', score: 10, isBomb: false, name: 'Ruby' },    // Red circle
+            { color: '#FFEB3B', score: 20, isBomb: false, name: 'Topaz' },   // Yellow triangle
+            { color: '#2196F3', score: 30, isBomb: false, name: 'Sapphire' }, // Blue square
+            { color: '#9C27B0', score: 40, isBomb: false, name: 'Amethyst' }, // Purple pentagon
+            { color: '#000000', score: -50, isBomb: true, name: 'Bomb' },     // Black bomb
+            { color: '#00FFAA', score: 0, isBomb: false, isPowerup: true, effect: 'magnet', name: 'Magnet' }, // Green diamond (powerup)
+            { color: '#FF9800', score: 0, isBomb: false, isPowerup: true, effect: 'slowmo', name: 'Slow Mo' }  // Orange star (powerup)
+        ];
+        
+        // Background particles
+        let bgParticles = [];
+        
+        // Create background particles
+        function createBackgroundParticles() {
+            for (let i = 0; i < 50; i++) {
+                bgParticles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 3 + 1,
+                    speed: Math.random() * 0.5 + 0.1,
+                    color: `hsl(${Math.random() * 360}, 70%, 50%)`,
+                    opacity: Math.random() * 0.3 + 0.1
+                });
+            }
+        }
+        
+        // Update and draw background particles
+        function updateBackgroundParticles() {
+            backgroundHue = (backgroundHue + 0.2) % 360;
+            document.body.style.background = `hsl(${backgroundHue}, 80%, 5%)`;
+            
+            bgParticles.forEach(p => {
+                p.y += p.speed;
+                if (p.y > canvas.height) {
+                    p.y = 0;
+                    p.x = Math.random() * canvas.width;
+                }
+                
+                ctx.globalAlpha = p.opacity;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            });
+        }
+        
+        // Shapes for objects
+        function drawCircle(x, y, radius, color) {
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.closePath();
+            
+            // Glow effect
+            if (!color.startsWith('rgba')) {
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 15;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+        
+        function drawTriangle(x, y, size, color) {
+            ctx.beginPath();
+            ctx.moveTo(x, y - size);
+            ctx.lineTo(x - size, y + size);
+            ctx.lineTo(x + size, y + size);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.closePath();
+            
+            // Glow effect
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 15;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawSquare(x, y, size, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x - size/2, y - size/2, size, size);
+            
+            // Glow effect
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 15;
+            ctx.fillRect(x - size/2, y - size/2, size, size);
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawPentagon(x, y, size, color) {
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+                const angle = (i * 2 * Math.PI / 5) - Math.PI/2;
+                ctx.lineTo(x + size * Math.cos(angle), y + size * Math.sin(angle));
+            }
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+            
+            // Glow effect
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 15;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawDiamond(x, y, size, color) {
+            ctx.beginPath();
+            ctx.moveTo(x, y - size);
+            ctx.lineTo(x + size, y);
+            ctx.lineTo(x, y + size);
+            ctx.lineTo(x - size, y);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+            
+            // Glow effect
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 15;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawStar(x, y, size, color) {
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+                const angle = (i * 2 * Math.PI / 5) - Math.PI/2;
+                ctx.lineTo(x + size * Math.cos(angle)), y + size * Math.sin(angle));
+                ctx.lineTo(x + size/2 * Math.cos(angle + Math.PI/5)), y + size/2 * Math.sin(angle + Math.PI/5));
+            }
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+            
+            // Glow effect
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 15;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+        
+        // Draw player (basket) with advanced effects
+        function drawPlayer() {
+            // Player glow animation
+            player.glow += player.glowDirection * 0.05;
+            if (player.glow > 1 || player.glow < 0) {
+                player.glowDirection *= -1;
+            }
+            
+            // Basket
+            ctx.beginPath();
+            ctx.moveTo(player.x, player.y);
+            ctx.lineTo(player.x + player.width, player.y);
+            ctx.lineTo(player.x + player.width - 20, player.y + player.height);
+            ctx.lineTo(player.x + 20, player.y + player.height);
+            ctx.closePath();
+            
+            const gradient = ctx.createLinearGradient(player.x, player.y, player.x + player.width, player.y + player.height);
+            gradient.addColorStop(0, '#4CAF50');
+            gradient.addColorStop(1, '#8BC34A');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            // Basket glow
+            ctx.shadowColor = `rgba(76, 175, 80, ${player.glow})`;
+            ctx.shadowBlur = 20;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            // Basket lines with glow
+            ctx.strokeStyle = '#CDDC39';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 5; i++) {
+                ctx.beginPath();
+                ctx.moveTo(player.x + 20 + i * 15, player.y + player.height);
+                ctx.lineTo(player.x + i * 20, player.y);
+                ctx.stroke();
+            }
+            
+            // Magnet effect visualization
+            if (magnetActive) {
+                ctx.beginPath();
+                ctx.arc(player.x + player.width/2, player.y + player.height/2, 150, 0, Math.PI * 2);
+                const magnetGradient = ctx.createRadialGradient(
+                    player.x + player.width/2, player.y + player.height/2, 0,
+                    player.x + player.width/2, player.y + player.height/2, 150
+                );
+                magnetGradient.addColorStop(0, 'rgba(0, 255, 170, 0.3)');
+                magnetGradient.addColorStop(1, 'rgba(0, 255, 170, 0)');
+                ctx.fillStyle = magnetGradient;
+                ctx.fill();
+            }
+        }
+        
+        // Create new falling object
+        function createFallingObject() {
+            const type = Math.floor(Math.random() * objectTypes.length);
+            const size = Math.random() * 15 + 15;
+            const object = {
+                x: Math.random() * (canvas.width - size * 2) + size,
+                y: -size,
+                size: size,
+                speed: Math.random() * 4 + (slowmoActive ? 1 : 3),
+                type: type,
+                rotation: 0,
+                rotationSpeed: Math.random() * 0.1 - 0.05,
+                wiggle: Math.random() * Math.PI * 2,
+                wiggleSpeed: Math.random() * 0.05 + 0.02,
+                wiggleAmount: Math.random() * 10 + 5
+            };
+            
+            fallingObjects.push(object);
+        }
+        
+        // Draw falling objects with advanced effects
+        function drawFallingObjects() {
+            fallingObjects.forEach(obj => {
+                const type = objectTypes[obj.type];
+                
+                ctx.save();
+                ctx.translate(obj.x + Math.sin(obj.wiggle) * obj.wiggleAmount, obj.y);
+                ctx.rotate(obj.rotation);
+                
+                if (type.isBomb) {
+                    // Draw bomb
+                    drawCircle(0, 0, obj.size, type.color);
+                    // Bomb fuse
+                    ctx.fillStyle = '#795548';
+                    ctx.fillRect(obj.size/2, -obj.size/2, 5, 10);
+                    // Spark animation
+                    if (Math.random() > 0.8) {
+                        ctx.fillStyle = `hsl(${Math.random() * 30 + 20}, 100%, 50%)`;
+                        ctx.beginPath();
+                        ctx.arc(obj.size/2 + 5, -obj.size/2, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                } else if (type.isPowerup) {
+                    // Draw powerups
+                    if (type.effect === 'magnet') {
+                        drawDiamond(0, 0, obj.size, type.color);
+                        // Pulsing effect
+                        const pulse = Math.sin(Date.now() * 0.01) * 0.2 + 1;
+                        ctx.scale(pulse, pulse);
+                        drawDiamond(0, 0, obj.size, type.color);
+                    } else if (type.effect === 'slowmo') {
+                        drawStar(0, 0, obj.size, type.color);
+                        // Rotating effect
+                        ctx.rotate(Date.now() * 0.005);
+                        drawStar(0, 0, obj.size, type.color);
+                    }
+                } else {
+                    // Draw regular objects
+                    switch(obj.type) {
+                        case 0: // Circle
+                            drawCircle(0, 0, obj.size, type.color);
+                            break;
+                        case 1: // Triangle
+                            drawTriangle(0, 0, obj.size, type.color);
+                            break;
+                        case 2: // Square
+                            drawSquare(0, 0, obj.size * 1.5, type.color);
+                            break;
+                        case 3: // Pentagon
+                            drawPentagon(0, 0, obj.size, type.color);
+                            break;
+                    }
+                }
+                
+                ctx.restore();
+            });
+        }
+        
+        // Update falling objects with magnet effect
+        function updateFallingObjects() {
+            const now = Date.now();
+            
+            for (let i = fallingObjects.length - 1; i >= 0; i--) {
+                const obj = fallingObjects[i];
+                const type = objectTypes[obj.type];
+                
+                // Update position
+                obj.y += obj.speed;
+                obj.rotation += obj.rotationSpeed;
+                obj.wiggle += obj.wiggleSpeed;
+                
+                // Magnet effect
+                if (magnetActive && !type.isBomb && now < magnetEndTime) {
+                    const playerCenterX = player.x + player.width/2;
+                    const playerCenterY = player.y + player.height/2;
+                    const objCenterX = obj.x + Math.sin(obj.wiggle) * obj.wiggleAmount;
+                    const dx = playerCenterX - objCenterX;
+                    const dy = playerCenterY - obj.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 150) {
+                        const force = 150 - distance;
+                        obj.x += dx * 0.05;
+                        obj.y += dy * 0.05;
+                    }
+                }
+                
+                // Check if object is caught by player
+                const objCenterX = obj.x + Math.sin(obj.wiggle) * obj.wiggleAmount;
+                if (obj.y + obj.size > player.y && 
+                    objCenterX > player.x && 
+                    objCenterX < player.x + player.width) {
+                    
+                    // Handle powerups
+                    if (type.isPowerup) {
+                        if (type.effect === 'magnet') {
+                            magnetActive = true;
+                            magnetEndTime = now + 10000; // 10 seconds
+                            magnetIndicator.style.display = 'block';
+                            setTimeout(() => {
+                                magnetActive = false;
+                                magnetIndicator.style.display = 'none';
+                            }, 10000);
+                        } else if (type.effect === 'slowmo') {
+                            slowmoActive = true;
+                            slowmoEndTime = now + 8000; // 8 seconds
+                            slowmoIndicator.style.display = 'block';
+                            setTimeout(() => {
+                                slowmoActive = false;
+                                slowmoIndicator.style.display = 'none';
+                            }, 8000);
+                        }
+                    }
+                    
+                    // Update score
+                    if (!type.isPowerup) {
+                        score += type.score * comboMultiplier;
+                        scoreDisplay.textContent = `SCORE: ${score}`;
+                        
+                        // Combo system
+                        const currentTime = Date.now();
+                        if (currentTime - lastCaughtTime < 1000) { // 1 second window
+                            comboCount++;
+                            if (comboCount >= 3) {
+                                comboMultiplier = Math.min(5, Math.floor(comboCount / 3) + 1);
+                                comboDisplay.textContent = `COMBO x${comboMultiplier}`;
+                                comboDisplay.style.display = 'block';
+                            }
+                        } else {
+                            comboCount = 1;
+                            comboMultiplier = 1;
+                            comboDisplay.style.display = 'none';
+                        }
+                        lastCaughtTime = currentTime;
+                    }
+                    
+                    // Create particle effect when caught
+                    if (!type.isBomb) {
+                        createParticles(obj.x, obj.y, type.color, type.name);
+                    } else {
+                        // Explosion effect for bomb
+                        createExplosion(obj.x, obj.y);
+                    }
+                    
+                    fallingObjects.splice(i, 1);
+                    continue;
+                }
+                
+                // Remove if out of screen
+                if (obj.y > canvas.height + obj.size * 2) {
+                    fallingObjects.splice(i, 1);
+                    comboCount = 0;
+                    comboMultiplier = 1;
+                    comboDisplay.style.display = 'none';
+                }
+            }
+        }
+        
+        // Particles for caught objects
+        let particles = [];
+        
+        function createParticles(x, y, color, name) {
+            const particleCount = name === 'Amethyst' ? 30 : 20;
+            
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    size: Math.random() * 5 + 2,
+                    color: color,
+                    speedX: Math.random() * 8 - 4,
+                    speedY: Math.random() * 8 - 4,
+                    life: 40,
+                    name: name,
+                    angle: Math.random() * Math.PI * 2,
+                    rotationSpeed: Math.random() * 0.2 - 0.1
+                });
+            }
+            
+            // Create floating text for score
+            if (name) {
+                particles.push({
+                    x: x,
+                    y: y - 30,
+                    text: `+${objectTypes.find(t => t.name === name).score * comboMultiplier}`,
+                    color: '#FFFFFF',
+                    speedY: -1,
+                    life: 60,
+                    size: 16 + comboMultiplier * 2
+                });
+            }
+        }
+        
+        function createExplosion(x, y) {
+            for (let i = 0; i < 60; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    size: Math.random() * 8 + 4,
+                    color: i % 3 === 0 ? '#FF5722' : (i % 3 === 1 ? '#FFC107' : '#FF0000'),
+                    speedX: Math.random() * 12 - 6,
+                    speedY: Math.random() * 12 - 6,
+                    life: 50,
+                    angle: 0,
+                    rotationSpeed: Math.random() * 0.3 - 0.15
+                });
+            }
+            
+            // Screen shake effect
+            canvas.style.transform = 'translate(5px, 5px)';
+            setTimeout(() => {
+                canvas.style.transform = 'translate(-5px, -5px)';
+                setTimeout(() => {
+                    canvas.style.transform = 'translate(0, 0)';
+                }, 50);
+            }, 50);
+        }
+        
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.speedX;
+                p.y += p.speedY;
+                p.life--;
+                
+                if ('angle' in p) {
+                    p.angle += p.rotationSpeed || 0;
+                }
+                
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+        
+        function drawParticles() {
+            particles.forEach(p => {
+                const alpha = p.life / (p.text ? 60 : 40);
+                ctx.globalAlpha = alpha;
+                
+                if (p.text) {
+                    // Draw text particle
+                    ctx.font = `bold ${p.size}px Poppins`;
+                    ctx.fillStyle = p.color;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(p.text, p.x, p.y);
+                } else {
+                    // Draw shape particle
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    
+                    if (p.name === 'Ruby') {
+                        ctx.rotate(p.angle);
+                        drawCircle(0, 0, p.size, p.color);
+                    } else if (p.name === 'Topaz') {
+                        ctx.rotate(p.angle);
+                        drawTriangle(0, 0, p.size, p.color);
+                    } else if (p.name === 'Sapphire') {
+                        ctx.rotate(p.angle);
+                        drawSquare(0, 0, p.size * 1.5, p.color);
+                    } else if (p.name === 'Amethyst') {
+                        ctx.rotate(p.angle);
+                        drawPentagon(0, 0, p.size, p.color);
+                    } else {
+                        // Explosion particles
+                        drawCircle(0, 0, p.size, p.color);
+                    }
+                    
+                    ctx.restore();
+                }
+                
+                ctx.globalAlpha = 1;
+            });
+        }
+        
+        // Update player position
+        function updatePlayer() {
+            player.x += player.dx;
+            
+            // Wall collision
+            if (player.x < 0) {
+                player.x = 0;
+            } else if (player.x + player.width > canvas.width) {
+                player.x = canvas.width - player.width;
+            }
+        }
+        
+        // Clear canvas
+        function clear() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        // Draw everything
+        function draw() {
+            clear();
+            
+            // Draw background particles
+            updateBackgroundParticles();
+            
+            // Draw falling objects
+            drawFallingObjects();
+            
+            // Draw player
+            drawPlayer();
+            
+            // Draw particles
+            drawParticles();
+            
+            // Draw powerup timers
+            const now = Date.now();
+            if (magnetActive && now < magnetEndTime) {
+                const timeLeft = ((magnetEndTime - now) / 1000).toFixed(1);
+                magnetIndicator.textContent = `MAGNET: ${timeLeft}s`;
+            }
+            
+            if (slowmoActive && now < slowmoEndTime) {
+                const timeLeft = ((slowmoEndTime - now) / 1000).toFixed(1);
+                slowmoIndicator.textContent = `SLOW MO: ${timeLeft}s`;
+            }
+        }
+        
+        // Game loop
+        function update() {
+            updatePlayer();
+            updateFallingObjects();
+            updateParticles();
+            draw();
+            
+            if (gameRunning) {
+                animationFrameId = requestAnimationFrame(update);
+            }
+        }
+        
+        // Start game
+        function startGame() {
+            score = 0;
+            timeLeft = 60;
+            fallingObjects = [];
+            particles = [];
+            comboCount = 0;
+            comboMultiplier = 1;
+            magnetActive = false;
+            slowmoActive = false;
+            
+            scoreDisplay.textContent = `SCORE: ${score}`;
+            timerDisplay.textContent = `TIME: ${timeLeft}`;
+            comboDisplay.style.display = 'none';
+            magnetIndicator.style.display = 'none';
+            slowmoIndicator.style.display = 'none';
+            
+            startScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            gameRunning = true;
+            
+            // Start object spawner
+            clearInterval(objectSpawnInterval);
+            objectSpawnInterval = setInterval(createFallingObject, 800);
+            
+            // Start timer
+            clearInterval(timerId);
+            timerId = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `TIME: ${timeLeft}`;
+                
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+            
+            update();
+        }
+        
+        // End game
+        function endGame() {
+            gameRunning = false;
+            clearInterval(timerId);
+            clearInterval(objectSpawnInterval);
+            cancelAnimationFrame(animationFrameId);
+            
+            // Update high score
+            if (score > highScoreValue) {
+                highScoreValue = score;
+                localStorage.setItem('highScore', highScoreValue);
+            }
+            
+            finalScore.textContent = `Score: ${score}`;
+            highScore.textContent = `High Score: ${highScoreValue}`;
+            gameOverScreen.style.display = 'flex';
+        }
+        
+        // Event listeners
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', startGame);
+        
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'd') {
+                player.dx = player.speed;
+            } else if (e.key === 'ArrowLeft' || e.key === 'a') {
+                player.dx = -player.speed;
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            if ((e.key === 'ArrowRight' || e.key === 'd') && player.dx > 0) {
+                player.dx = 0;
+            } else if ((e.key === 'ArrowLeft' || e.key === 'a') && player.dx < 0) {
+                player.dx = 0;
+            }
+        });
+        
+        // Mouse/touch controls
+        canvas.addEventListener('mousemove', (e) => {
+            if (gameRunning) {
+                const rect = canvas.getBoundingClientRect();
+                player.x = e.clientX - rect.left - player.width / 2;
+            }
+        });
+        
+        canvas.addEventListener('touchmove', (e) => {
+            if (gameRunning) {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                player.x = e.touches[0].clientX - rect.left - player.width / 2;
+            }
+        }, { passive: false });
+        
+        // Initialize background particles
+        createBackgroundParticles();
+    </script>
 </body>
 </html>
