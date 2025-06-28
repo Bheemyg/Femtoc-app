@@ -1,885 +1,3759 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Color Blast - Advanced Animated Game</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MagicText Tools Pro+</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fflate@0.7.4/umd/index.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Fredoka+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-analytics-compat.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
-        
-        body {
+        :root {
+            --primary-1: #4361ee;
+            --primary-2: #3a0ca3;
+            --accent-1: #f72585;
+            --accent-2: #4cc9f0;
+            --success: #4ade80;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --dark-bg: #121212;
+            --dark-surface: #1e1e1e;
+            --light-text: #ffffff;
+            --dark-text: #121212;
+            --border-radius: 16px;
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            background: #000;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
             font-family: 'Poppins', sans-serif;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: var(--dark-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-        
-        #gameContainer {
-            position: relative;
-            width: 450px;
-            height: 650px;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+
+        /* App Container */
+        .app-container {
+            max-width: 100%;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0 auto;
+            overflow-x: hidden;
         }
-        
-        #gameCanvas {
-            display: block;
-        }
-        
-        #startScreen, #gameOverScreen {
-            position: absolute;
+
+        /* Background Animation Styles */
+        .animated-bg {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        /* Bubble Animation */
+        .bubble-animation .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(67, 97, 238, 0.1);
+            animation: float 15s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20vh) translateX(10vw); }
+            50% { transform: translateY(10vh) translateX(-10vw); }
+            75% { transform: translateY(-10vh) translateX(15vw); }
+        }
+
+        /* Particle Animation */
+        .particle-animation .particle {
+            position: absolute;
+            background: rgba(67, 97, 238, 0.3);
+            border-radius: 50%;
+            animation: particleMove 20s linear infinite;
+        }
+
+        @keyframes particleMove {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(20vw); opacity: 0; }
+        }
+
+        /* Wave Animation */
+        .wave-animation {
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            overflow: hidden;
+        }
+
+        .wave-animation .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 200%;
+            height: 10em;
+            background: rgba(255, 255, 255, 0.1);
+            animation: wave 10s linear infinite;
+            transform-origin: 50% 50%;
+            border-radius: 40%;
+        }
+
+        .wave-animation .wave:nth-child(2) {
+            animation-delay: 0.5s;
+            opacity: 0.5;
+        }
+
+        .wave-animation .wave:nth-child(3) {
+            animation-delay: 1s;
+            opacity: 0.3;
+        }
+
+        @keyframes wave {
+            0% { transform: translateX(0) translateY(0) rotate(0deg); }
+            50% { transform: translateX(-25%) translateY(-20px) rotate(5deg); }
+            100% { transform: translateX(-50%) translateY(0) rotate(0deg); }
+        }
+
+        /* Geometric Animation */
+        .geometric-animation .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: geometricRotate 30s linear infinite;
+        }
+
+        .geometric-animation .shape.triangle {
+            width: 0;
+            height: 0;
+            border-left: 50px solid transparent;
+            border-right: 50px solid transparent;
+            border-bottom: 100px solid var(--primary-1);
+        }
+
+        .geometric-animation .shape.circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--accent-1);
+        }
+
+        .geometric-animation .shape.square {
+            width: 80px;
+            height: 80px;
+            background: var(--accent-2);
+        }
+
+        @keyframes geometricRotate {
+            from { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+            to { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+        }
+
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary-1), var(--primary-2));
+            color: white;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .app-title {
+            font-family: 'Fredoka One', cursive;
+            font-weight: 400;
+            font-size: 1.8rem;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(to right, #fff 0%, #4cc9f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        /* Navigation */
+        .app-nav {
             display: flex;
-            flex-direction: column;
+            justify-content: center;
+            background-color: white;
+            padding: 0.75rem;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            margin: 0 1rem;
+            border-radius: var(--border-radius);
+            transform: translateY(-20px);
+            opacity: 0;
+            animation: fadeInUp 0.6s 0.3s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .nav-button {
+            flex: 1;
+            max-width: 180px;
+            padding: 0.75rem;
+            margin: 0 0.25rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, white, #f8fafc);
+            color: var(--primary-1);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
             align-items: center;
             justify-content: center;
-            background-color: rgba(0, 0, 0, 0.85);
-            color: white;
-            text-align: center;
-            z-index: 10;
-        }
-        
-        #gameOverScreen {
-            display: none;
-        }
-        
-        h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
-            background: linear-gradient(to right, #ff8a00, #e52e71);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-        }
-        
-        .subtitle {
-            font-size: 1.2em;
-            margin-bottom: 30px;
-            max-width: 80%;
-            line-height: 1.5;
-        }
-        
-        button {
-            padding: 15px 40px;
-            font-size: 1.3em;
-            background: linear-gradient(45deg, #ff8a00, #e52e71);
-            border: none;
-            border-radius: 50px;
-            color: white;
-            cursor: pointer;
-            margin-top: 20px;
-            box-shadow: 0 5px 25px rgba(229, 46, 113, 0.5);
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(67, 97, 238, 0.1);
             position: relative;
             overflow: hidden;
         }
-        
-        button:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(229, 46, 113, 0.7);
-        }
-        
-        button:before {
+
+        .nav-button::before {
             content: '';
             position: absolute;
             top: 0;
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
             transition: 0.5s;
         }
-        
-        button:hover:before {
+
+        .nav-button:hover::before {
             left: 100%;
         }
-        
-        #scoreDisplay {
-            position: absolute;
-            top: 20px;
-            left: 20px;
+
+        .nav-button.active {
+            background: linear-gradient(135deg, var(--primary-1), var(--primary-2));
             color: white;
-            font-size: 1.5em;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            z-index: 5;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(67, 97, 238, 0.3);
         }
-        
-        #timerDisplay {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: white;
-            font-size: 1.5em;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            z-index: 5;
+
+        .nav-button i {
+            margin-right: 6px;
+            font-size: 1rem;
         }
-        
-        #comboDisplay {
-            position: absolute;
-            top: 60px;
-            left: 20px;
-            color: #00ffaa;
-            font-size: 1.2em;
-            text-shadow: 0 0 10px rgba(0, 255, 170, 0.7);
-            z-index: 5;
+
+        /* Tool Containers */
+        .tool-container {
             display: none;
+            padding: 1rem;
+            animation: fadeIn 0.5s ease;
         }
-        
-        #backgroundEffects {
+
+        .tool-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tool Cards */
+        .tool-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--box-shadow);
+            border: 1px solid rgba(255,255,255,0.3);
+            transform: scale(0.95);
+            opacity: 0;
+            animation: cardEntrance 0.6s forwards;
+        }
+
+        @keyframes cardEntrance {
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .tool-card:nth-child(1) { animation-delay: 0.1s; }
+        .tool-card:nth-child(2) { animation-delay: 0.2s; }
+        .tool-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .tool-title {
+            font-size: 1.3rem;
+            margin-bottom: 1.25rem;
+            color: var(--primary-1);
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .tool-title i {
+            margin-right: 0.75rem;
+            font-size: 1.4rem;
+            background: linear-gradient(135deg, var(--primary-1), var(--accent-1));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Input Fields */
+        textarea, input, select {
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1.25rem;
+            font-size: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            resize: none;
+            transition: var(--transition);
+            font-family: 'Poppins', sans-serif;
+            background: rgba(255,255,255,0.8);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        textarea {
+            min-height: 120px;
+        }
+
+        textarea:focus, input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-2);
+            box-shadow: 0 0 0 3px rgba(76, 201, 240, 0.3), inset 0 2px 5px rgba(0,0,0,0.05);
+            background: white;
+        }
+
+        /* Password Input */
+        .password-input {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        /* File Input */
+        .file-input-container {
+            position: relative;
+            margin-bottom: 1.25rem;
+        }
+
+        .file-input-label {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            border: 2px dashed #e2e8f0;
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: rgba(255,255,255,0.8);
+        }
+
+        .file-input-label:hover {
+            border-color: var(--accent-2);
+            background: white;
+        }
+
+        .file-input-label i {
+            display: block;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-1);
+        }
+
+        .file-input {
+            position: absolute;
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .file-info {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #64748b;
+            text-align: center;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        button {
+            padding: 0.9rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            min-width: 140px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        button::after {
+            content: '';
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: translateX(-100%);
+            transition: 0.6s;
+            z-index: -1;
+        }
+
+        button:hover::after {
+            transform: translateX(100%);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button i {
+            margin-right: 8px;
+            font-size: 1.1rem;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--primary-1), var(--primary-2));
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background: linear-gradient(135deg, var(--primary-2), var(--primary-1));
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
+        }
+
+        .secondary-btn {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            color: var(--dark-text);
+        }
+
+        .secondary-btn:hover {
+            background: linear-gradient(135deg, #e2e8f0, #f1f5f9);
+        }
+
+        .success-btn {
+            background: linear-gradient(135deg, var(--success), #22c55e);
+            color: white;
+        }
+
+        .success-btn:hover {
+            background: linear-gradient(135deg, #22c55e, var(--success));
+            box-shadow: 0 8px 20px rgba(74, 222, 128, 0.3);
+        }
+
+        .warning-btn {
+            background: linear-gradient(135deg, var(--warning), #eab308);
+            color: white;
+        }
+
+        .warning-btn:hover {
+            background: linear-gradient(135deg, #eab308, var(--warning));
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+        }
+
+        .error-btn {
+            background: linear-gradient(135deg, var(--error), #dc2626);
+            color: white;
+        }
+
+        .error-btn:hover {
+            background: linear-gradient(135deg, #dc2626, var(--error));
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .accent-btn {
+            background: linear-gradient(135deg, var(--accent-1), #f72585);
+            color: white;
+        }
+
+        .accent-btn:hover {
+            background: linear-gradient(135deg, #f72585, var(--accent-1));
+            box-shadow: 0 8px 20px rgba(247, 37, 133, 0.3);
+        }
+
+        /* Result Section */
+        .result-section {
+            margin-top: 1.5rem;
+            animation: fadeIn 0.5s 0.2s both;
+        }
+
+        .result-label {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: block;
+            color: var(--primary-1);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin: 1rem 0;
             overflow: hidden;
         }
-        
-        .powerup-indicator {
-            position: absolute;
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-1), var(--accent-1));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Extracted File Info */
+        .extracted-file {
+            background: rgba(255,255,255,0.7);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .extracted-file i {
+            font-size: 2rem;
+            color: var(--primary-1);
+            margin-bottom: 0.5rem;
+        }
+
+        .extracted-file-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .extracted-file-info {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        /* History Section */
+        .history-item {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            background: rgba(255,255,255,0.7);
+            border: 1px solid rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .history-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            background: white;
+            border-color: rgba(67, 97, 238, 0.2);
+        }
+
+        .history-item:active {
+            transform: translateY(0);
+        }
+
+        .history-text {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .history-time {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        /* Popups */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.3s ease;
+        }
+
+        .popup-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .popup-box {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            width: 90%;
+            max-width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: scale(0.9);
+            opacity: 0;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .popup-overlay.active .popup-box {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .popup-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            color: var(--primary-1);
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .popup-content {
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .popup-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+
+        /* Password Popup */
+        .password-popup-content {
+            text-align: center;
+        }
+
+        .password-popup-content i {
+            font-size: 2rem;
+            color: var(--primary-1);
+            margin-bottom: 0.8rem;
+        }
+
+        /* Theme Selector */
+        .theme-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .theme-option {
+            height: 45px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+        }
+
+        .theme-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .theme-option.active {
+            border: 2px solid white;
+            box-shadow: 0 0 0 3px var(--primary-1), 0 6px 12px rgba(0,0,0,0.15);
+            transform: scale(1.05);
+        }
+
+        /* Background Style Selector */
+        .bg-style-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .bg-style-option {
+            height: 55px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            color: var(--dark-text);
+            font-weight: 500;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 2px solid #e2e8f0;
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        .bg-style-option i {
+            margin-bottom: 0.2rem;
+            font-size: 1.1rem;
+        }
+
+        .bg-style-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .bg-style-option.active {
+            border: 2px solid var(--primary-1);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2), 0 6px 12px rgba(0,0,0,0.15);
+            transform: scale(1.05);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
             bottom: 20px;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--dark-surface);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            max-width: 90%;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, var(--success), #22c55e);
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, var(--error), #dc2626);
+        }
+
+        .toast.warning {
+            background: linear-gradient(135deg, var(--warning), #eab308);
+        }
+
+        .toast i {
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Dark Mode */
+        .dark-mode {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            color: var(--light-text);
+        }
+
+        .dark-mode .tool-card {
+            background: rgba(30, 30, 30, 0.9);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .dark-mode textarea,
+        .dark-mode input,
+        .dark-mode select {
+            background: rgba(40, 40, 40, 0.8);
+            color: var(--light-text);
+            border-color: #444;
+        }
+
+        .dark-mode textarea:focus,
+        .dark-mode input:focus,
+        .dark-mode select:focus {
+            background: rgba(50, 50, 50, 0.9);
+            border-color: var(--accent-2);
+        }
+
+        .dark-mode .file-input-label {
+            background: rgba(40, 40, 40, 0.8);
+            border-color: #444;
+            color: var(--light-text);
+        }
+
+        .dark-mode .file-input-label:hover {
+            background: rgba(50, 50, 50, 0.9);
+        }
+
+        .dark-mode .secondary-btn {
+            background: linear-gradient(135deg, #333, #444);
+            color: var(--light-text);
+        }
+
+        .dark-mode .history-item {
+            background: rgba(40, 40, 40, 0.8);
+            border-color: rgba(255,255,255,0.05);
+        }
+
+        .dark-mode .history-item:hover {
+            background: rgba(50, 50, 50, 0.9);
+        }
+
+        .dark-mode .popup-box {
+            background: var(--dark-surface);
+            color: var(--light-text);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .dark-mode .bg-style-option {
+            background: #333;
+            color: white;
+            border-color: #444;
+        }
+
+        .dark-mode .extracted-file {
+            background: rgba(40, 40, 40, 0.8);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 480px) {
+            .app-title {
+                font-size: 1.5rem;
+            }
+            
+            .nav-button {
+                font-size: 0.8rem;
+                padding: 0.7rem;
+                min-width: auto;
+            }
+            
+            .nav-button i {
+                margin-right: 0;
+                font-size: 1rem;
+            }
+            
+            .nav-button span {
+                display: none;
+            }
+            
+            button {
+                min-width: 100%;
+                padding: 0.9rem;
+            }
+            
+            .theme-options, .bg-style-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .popup-box {
+                padding: 1rem;
+                max-width: 280px;
+            }
+        }
+
+        /* Special Animations */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .rainbow-text {
+            background: linear-gradient(90deg, #f72585, #7209b7, #3a0ca3, #4361ee, #4cc9f0);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: rainbow 8s ease infinite;
+        }
+
+        /* Custom popup button sizes */
+        .popup-actions button {
+            padding: 0.7rem 1rem;
+            min-width: 100px;
+            font-size: 0.9rem;
+        }
+
+        /* Status messages for file operations */
+        .status {
             display: none;
-            font-size: 1.2em;
-            color: #00ffaa;
-            text-shadow: 0 0 10px rgba(0, 255, 170, 0.7);
-            z-index: 5;
+            padding: 0.8rem;
+            border-radius: var(--border-radius);
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* Language Selector */
+        .language-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .language-option {
+            height: 55px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            color: var(--dark-text);
+            font-weight: 500;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 2px solid #e2e8f0;
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        .language-option i {
+            margin-bottom: 0.2rem;
+            font-size: 1.1rem;
+        }
+
+        .language-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .language-option.active {
+            border: 2px solid var(--primary-1);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2), 0 6px 12px rgba(0,0,0,0.15);
+            transform: scale(1.05);
+        }
+
+        /* Tutorial styles */
+        .tutorial-step {
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tutorial-step h3 {
+            color: var(--primary-1);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .tutorial-step h3 i {
+            margin-right: 0.5rem;
+        }
+
+        .tutorial-step p {
+            margin-bottom: 0.5rem;
+        }
+
+        .tutorial-highlight {
+            background-color: rgba(76, 201, 240, 0.2);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .tutorial-image {
+            width: 100%;
+            border-radius: var(--border-radius);
+            margin: 0.5rem 0;
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: var(--box-shadow);
+        }
+
+        /* Welcome popup */
+        .welcome-popup .popup-box {
+            max-width: 400px;
+        }
+
+        .welcome-popup .popup-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-popup .popup-content {
+            text-align: center;
+        }
+
+        .welcome-popup .popup-content i {
+            font-size: 3rem;
+            color: var(--primary-1);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .welcome-popup .popup-actions {
+            margin-top: 1rem;
+        }
+
+        /* Language selector in nav */
+        .language-selector {
+            position: relative;
+            margin-left: 0.5rem;
+        }
+
+        .language-selector-btn {
+            background: transparent;
+            border: none;
+            color: var(--primary-1);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .language-selector-btn:hover {
+            background: rgba(67, 97, 238, 0.1);
+        }
+
+        .language-selector-btn i {
+            margin-right: 0.3rem;
+        }
+
+        .language-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 0.5rem;
+            z-index: 100;
+            display: none;
+            min-width: 120px;
+        }
+
+        .language-selector:hover .language-dropdown {
+            display: block;
+        }
+
+        .language-item {
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+
+        .language-item:hover {
+            background: rgba(67, 97, 238, 0.1);
+        }
+
+        .language-item i {
+            margin-right: 0.5rem;
+            color: var(--primary-1);
+        }
+
+        /* File Preview Popup */
+        .file-preview-popup .popup-box {
+            max-width: 95%;
+            width: 100%;
+            max-height: 90vh;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .file-preview-header {
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-1), var(--primary-2));
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-preview-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 80%;
+        }
+
+        .file-preview-content {
+            padding: 1rem;
+            max-height: 60vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .file-preview-actions {
+            padding: 1rem;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .file-preview-media {
+            max-width: 100%;
+            max-height: 50vh;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+        }
+
+        .file-preview-audio {
+            width: 100%;
+            margin: 1rem 0;
+        }
+
+        .file-preview-video {
+            width: 100%;
+            max-height: 50vh;
+            border-radius: var(--border-radius);
+        }
+
+        .file-preview-details {
+            width: 100%;
+            text-align: left;
+            margin-top: 1rem;
+        }
+
+        .file-preview-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+        .file-preview-detail-label {
+            font-weight: 600;
+            color: var(--primary-1);
+        }
+
+        .file-preview-detail-value {
+            color: var(--dark-text);
+        }
+
+        /* Dark mode for file preview */
+        .dark-mode .file-preview-header {
+            background: linear-gradient(135deg, #333, #444);
+        }
+
+        .dark-mode .file-preview-actions {
+            border-top: 1px solid #444;
+        }
+
+        .dark-mode .file-preview-detail {
+            border-bottom: 1px dashed #444;
+        }
+
+        /* Responsive adjustments for file preview */
+        @media (max-width: 480px) {
+            .file-preview-actions {
+                flex-direction: column;
+            }
+            
+            .file-preview-actions button {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="backgroundEffects"></div>
-    
-    <div id="gameContainer">
-        <canvas id="gameCanvas" width="450" height="650"></canvas>
-        
-        <div id="startScreen">
-            <h1>COLOR BLAST</h1>
-            <p class="subtitle">Catch the colorful shapes to score points. Avoid the bombs! Collect powerups for special abilities.</p>
-            <button id="startButton">START ADVENTURE</button>
-        </div>
-        
-        <div id="gameOverScreen">
-            <h1>GAME OVER</h1>
-            <p id="finalScore" style="font-size: 1.8em; margin-bottom: 10px;">Score: 0</p>
-            <p id="highScore" style="font-size: 1.3em; color: #00ffaa; margin-bottom: 30px;">High Score: 0</p>
-            <button id="restartButton">PLAY AGAIN</button>
-        </div>
-        
-        <div id="scoreDisplay">SCORE: 0</div>
-        <div id="timerDisplay">TIME: 60</div>
-        <div id="comboDisplay">COMBO x1</div>
-        <div id="magnetIndicator" class="powerup-indicator">MAGNET ACTIVE!</div>
-        <div id="slowmoIndicator" class="powerup-indicator">SLOW MOTION!</div>
+    <!-- Animated Background -->
+    <div class="animated-bg bubble-animation">
+        <div class="bubble" style="width: 200px; height: 200px; top: 10%; left: 5%; animation-delay: 0s;"></div>
+        <div class="bubble" style="width: 150px; height: 150px; top: 60%; left: 80%; animation-delay: 2s;"></div>
+        <div class="bubble" style="width: 250px; height: 250px; top: 30%; left: 40%; animation-delay: 4s;"></div>
+        <div class="bubble" style="width: 100px; height: 100px; top: 80%; left: 20%; animation-delay: 6s;"></div>
     </div>
 
+    <!-- App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="app-header">
+            <h1 class="app-title">Magic<span class="rainbow-text">World</span> Pro+</h1>
+        </header>
+
+        <!-- App Navigation -->
+        <nav class="app-nav">
+            <button class="nav-button active" onclick="showTool('encryptTool')">
+                <i class="fas fa-lock"></i><span>Encrypt</span>
+            </button>
+            <button class="nav-button" onclick="showTool('repeatTool')">
+                <i class="fas fa-redo"></i><span>Repeater</span>
+            </button>
+            <button class="nav-button" onclick="showTool('fileTool')">
+                <i class="fas fa-file-alt"></i><span>File Secret</span>
+            </button>
+            <button class="nav-button" onclick="showSettingsPopup()">
+                <i class="fas fa-cog"></i><span>Settings</span>
+            </button>
+            <div class="language-selector">
+                <button class="language-selector-btn" onclick="event.stopPropagation();">
+                    <i class="fas fa-language"></i>
+                    <span id="currentLanguage">EN</span>
+                </button>
+                <div class="language-dropdown">
+                    <div class="language-item" onclick="setLanguage('en')">
+                        <i class="fas fa-check" id="langCheck-en"></i> English
+                    </div>
+                    <div class="language-item" onclick="setLanguage('hi')">
+                        <i class="fas fa-check" id="langCheck-hi"></i> Hindi
+                    </div>
+                    <div class="language-item" onclick="setLanguage('ur')">
+                        <i class="fas fa-check" id="langCheck-ur"></i> Urdu
+                    </div>
+                    <div class="language-item" onclick="setLanguage('es')">
+                        <i class="fas fa-check" id="langCheck-es"></i> Spanish
+                    </div>
+                    <div class="language-item" onclick="setLanguage('fr')">
+                        <i class="fas fa-check" id="langCheck-fr"></i> French
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Encrypt/Decrypt Tool -->
+        <div id="encryptTool" class="tool-container active">
+            <div class="tool-card">
+                <h2 class="tool-title"><i class="fas fa-key"></i> <span data-translate="secure_encryption">Secure Encryption</span></h2>
+                
+                <textarea id="encryptInput" placeholder="Enter your secret message here..." rows="4"></textarea>
+                
+                <div class="password-input">
+                    <input type="password" id="encryptPassword" placeholder="Set encryption password (required)">
+                    <i class="fas fa-eye password-toggle" onclick="togglePasswordVisibility('encryptPassword')"></i>
+                </div>
+                
+                <div class="button-group">
+                    <button class="primary-btn" onclick="encryptText()">
+                        <i class="fas fa-lock"></i> <span data-translate="encrypt">Encrypt</span>
+                    </button>
+                    <button class="accent-btn" onclick="showDecryptPopup()">
+                        <i class="fas fa-unlock"></i> <span data-translate="decrypt">Decrypt</span>
+                    </button>
+                </div>
+                
+                <div class="result-section">
+                    <label class="result-label"><i class="fas fa-result"></i> <span data-translate="result">Result</span>:</label>
+                    <textarea id="encryptOutput" placeholder="Your encrypted result will appear here..." rows="4" readonly></textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button class="success-btn" onclick="copyToClipboard('encryptOutput')">
+                        <i class="fas fa-copy"></i> <span data-translate="copy">Copy</span>
+                    </button>
+                    <button class="warning-btn" onclick="shareResult('encryptOutput')">
+                        <i class="fas fa-share-alt"></i> <span data-translate="share">Share</span>
+                    </button>
+                    <button class="error-btn" onclick="clearFields(['encryptInput', 'encryptOutput', 'encryptPassword'])">
+                        <i class="fas fa-trash"></i> <span data-translate="clear">Clear</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Text Repeater Tool -->
+        <div id="repeatTool" class="tool-container">
+            <div class="tool-card">
+                <h2 class="tool-title"><i class="fas fa-redo"></i> <span data-translate="text_repeater">Text Repeater</span></h2>
+                
+                <textarea id="repeatInput" placeholder="Enter text to repeat..." rows="3"></textarea>
+                <input type="number" id="repeatCount" placeholder="Repeat count (1-1000)" min="1" max="1000">
+                
+                <div class="button-group">
+                    <button class="primary-btn" onclick="repeatText()">
+                        <i class="fas fa-magic"></i> <span data-translate="generate">Generate</span>
+                    </button>
+                    <button class="error-btn" onclick="showClearPopup()">
+                        <i class="fas fa-trash"></i> <span data-translate="clear">Clear</span>
+                    </button>
+                </div>
+                
+                <div class="result-section">
+                    <label class="result-label"><i class="fas fa-result"></i> <span data-translate="result">Result</span>:</label>
+                    <textarea id="repeatOutput" placeholder="Your repeated text will appear here..." rows="4" readonly></textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button class="success-btn" onclick="copyToClipboard('repeatOutput')">
+                        <i class="fas fa-copy"></i> <span data-translate="copy">Copy</span>
+                    </button>
+                    <button class="warning-btn" onclick="shareResult('repeatOutput')">
+                        <i class="fas fa-share-alt"></i> <span data-translate="share">Share</span>
+                    </button>
+                    <button class="secondary-btn" onclick="saveToHistory()">
+                        <i class="fas fa-save"></i> <span data-translate="save">Save</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="tool-card">
+                <h2 class="tool-title"><i class="fas fa-history"></i> <span data-translate="saved_history">Saved History</span></h2>
+                <div id="historyBox">
+                    <!-- History items will be added here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- File Steganography Tool -->
+        <div id="fileTool" class="tool-container">
+            <div class="tool-card">
+                <h2 class="tool-title"><i class="fas fa-file-archive"></i> <span data-translate="ultimate_file_hider">Ultimate File Hider</span></h2>
+                
+                <div class="file-input-container">
+                    <label for="coverFile" class="file-input-label">
+                        <i class="fas fa-file-image"></i>
+                        <span id="coverFileName" data-translate="select_carrier_file">Select carrier file (any type)</span>
+                    </label>
+                    <input type="file" id="coverFile" class="file-input" accept="*">
+                    <div id="coverFileInfo" class="file-info"></div>
+                </div>
+                
+                <div class="file-input-container">
+                    <label for="secretFile" class="file-input-label">
+                        <i class="fas fa-file-alt"></i>
+                        <span id="secretFileName" data-translate="select_file_to_hide">Select file to hide</span>
+                    </label>
+                    <input type="file" id="secretFile" class="file-input" accept="*">
+                    <div id="secretFileInfo" class="file-info"></div>
+                </div>
+                
+                <div class="password-input">
+                    <input type="password" id="hidePassword" placeholder="Set password for hidden file (required)">
+                    <i class="fas fa-eye password-toggle" onclick="togglePasswordVisibility('hidePassword')"></i>
+                </div>
+                
+                <div class="button-group">
+                    <button class="primary-btn" onclick="processHideFile()">
+                        <i class="fas fa-eye-slash"></i> <span data-translate="hide_file">Hide File</span>
+                    </button>
+                    <button class="accent-btn" onclick="showExtractPopup()">
+                        <i class="fas fa-eye"></i> <span data-translate="extract_file">Extract File</span>
+                    </button>
+                </div>
+                
+                <div id="fileProgressContainer" class="progress-container" style="display: none;">
+                    <div id="hideProgress" class="progress-bar" style="width: 0%"></div>
+                </div>
+                
+                <div id="hideStatus" class="status" style="display: none;"></div>
+            </div>
+            
+            <div class="tool-card">
+                <h2 class="tool-title"><i class="fas fa-info-circle"></i> <span data-translate="how_it_works">How It Works</span></h2>
+                <p style="margin-bottom: 1rem;">
+                    <strong data-translate="hide_a_file">Hide a File:</strong> <span data-translate="hide_file_desc">Select any carrier file and a file to hide inside it. Set a password and click "Hide File" to download the new file with your secret file hidden inside.</span>
+                </p>
+                <p>
+                    <strong data-translate="extract_a_file">Extract a File:</strong> <span data-translate="extract_file_desc">Upload a file that has a hidden file inside it. Enter the correct password to extract and download the original hidden file.</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear Popup -->
+    <div id="clearPopup" class="popup-overlay">
+        <div class="popup-box">
+            <h2 class="popup-title" data-translate="clear_options">Clear Options</h2>
+            <div class="popup-content" data-translate="what_to_clear">
+                What would you like to clear?
+            </div>
+            <div class="popup-actions">
+                <button class="primary-btn" onclick="clearFields(['repeatInput', 'repeatOutput', 'repeatCount']); hidePopup('clearPopup')">
+                    <i class="fas fa-font"></i> <span data-translate="text">Text</span>
+                </button>
+                <button class="error-btn" onclick="clearHistory(); hidePopup('clearPopup')">
+                    <i class="fas fa-history"></i> <span data-translate="history">History</span>
+                </button>
+            </div>
+            <button class="secondary-btn" onclick="hidePopup('clearPopup')" style="margin-top: 1rem; width: 100%;">
+                <i class="fas fa-times"></i> <span data-translate="cancel">Cancel</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Decrypt Popup -->
+    <div id="decryptPopup" class="popup-overlay">
+        <div class="popup-box">
+            <h2 class="popup-title" data-translate="decrypt_message">Decrypt Message</h2>
+            <div class="password-popup-content">
+                <i class="fas fa-key"></i>
+                <div class="password-input" style="margin-bottom: 1.5rem;">
+                    <input type="password" id="decryptPassword" placeholder="Enter decryption password">
+                    <i class="fas fa-eye password-toggle" onclick="togglePasswordVisibility('decryptPassword')"></i>
+                </div>
+            </div>
+            <div class="popup-actions">
+                <button class="primary-btn" onclick="decryptText()">
+                    <i class="fas fa-unlock"></i> <span data-translate="decrypt">Decrypt</span>
+                </button>
+                <button class="secondary-btn" onclick="hidePopup('decryptPopup')">
+                    <i class="fas fa-times"></i> <span data-translate="cancel">Cancel</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extract File Popup -->
+    <div id="extractPopup" class="popup-overlay">
+        <div class="popup-box">
+            <h2 class="popup-title" data-translate="extract_hidden_file">Extract Hidden File</h2>
+            <div class="password-popup-content">
+                <i class="fas fa-file-archive"></i>
+                <div class="file-input-container" style="margin: 1rem 0;">
+                    <label for="hiddenDataFile" class="file-input-label">
+                        <i class="fas fa-file-upload"></i>
+                        <span id="hiddenFileName" data-translate="select_hidden_file">Select file with hidden content</span>
+                    </label>
+                    <input type="file" id="hiddenDataFile" class="file-input" accept="*">
+                </div>
+                <div class="password-input" style="margin-bottom: 1.5rem;">
+                    <input type="password" id="extractPassword" placeholder="Enter extraction password">
+                    <i class="fas fa-eye password-toggle" onclick="togglePasswordVisibility('extractPassword')"></i>
+                </div>
+            </div>
+            <div class="popup-actions">
+                <button class="primary-btn" onclick="processExtractFile()">
+                    <i class="fas fa-download"></i> <span data-translate="extract">Extract</span>
+                </button>
+                <button class="secondary-btn" onclick="hidePopup('extractPopup')">
+                    <i class="fas fa-times"></i> <span data-translate="cancel">Cancel</span>
+                </button>
+            </div>
+            <div id="extractStatus" class="status" style="display: none; margin-top: 1rem;"></div>
+            <div id="extractProgressContainer" class="progress-container" style="display: none; margin-top: 1rem;">
+                <div id="extractProgress" class="progress-bar" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Popup -->
+    <div id="settingsPopup" class="popup-overlay">
+        <div class="popup-box">
+            <h2 class="popup-title" data-translate="app_settings">App Settings</h2>
+            
+            <div class="popup-content">
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--primary-1);" data-translate="background_style">Background Style</h3>
+                <div class="bg-style-options">
+                    <div class="bg-style-option active" onclick="setBackgroundStyle('bubble')">
+                        <i class="fas fa-bubbles"></i>
+                        <span data-translate="bubble">Bubble</span>
+                    </div>
+                    <div class="bg-style-option" onclick="setBackgroundStyle('particle')">
+                        <i class="fas fa-sparkles"></i>
+                        <span data-translate="particle">Particle</span>
+                    </div>
+                    <div class="bg-style-option" onclick="setBackgroundStyle('wave')">
+                        <i class="fas fa-water"></i>
+                        <span data-translate="wave">Wave</span>
+                    </div>
+                    <div class="bg-style-option" onclick="setBackgroundStyle('geometric')">
+                        <i class="fas fa-shapes"></i>
+                        <span data-translate="geometric">Geometric</span>
+                    </div>
+                </div>
+                
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--primary-1); margin-top: 1.5rem;" data-translate="color_theme">Color Theme</h3>
+                <div class="theme-options">
+                    <div class="theme-option active" style="background: linear-gradient(135deg, #4361ee, #3a0ca3);" onclick="setTheme('default')">
+                        <span data-translate="default">Default</span>
+                    </div>
+                    <div class="theme-option" style="background: linear-gradient(135deg, #f72585, #7209b7);" onclick="setTheme('pink')">
+                        <span data-translate="pink">Pink</span>
+                    </div>
+                    <div class="theme-option" style="background: linear-gradient(135deg, #4cc9f0, #4895ef);" onclick="setTheme('blue')">
+                        <span data-translate="ocean">Ocean</span>
+                    </div>
+                    <div class="theme-option" style="background: linear-gradient(135deg, #4ade80, #38b000);" onclick="setTheme('green')">
+                        <span data-translate="green">Green</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="popup-actions">
+                <button class="primary-btn" onclick="hidePopup('settingsPopup')">
+                    <i class="fas fa-check"></i> <span data-translate="done">Done</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Welcome Popup -->
+    <div id="welcomePopup" class="popup-overlay welcome-popup active">
+        <div class="popup-box">
+            <h2 class="popup-title rainbow-text" data-translate="welcome_title">Welcome to MagicWorld Pro+</h2>
+            <div class="popup-content">
+                <i class="fas fa-magic"></i>
+                <p data-translate="welcome_message">Thank you for using our powerful tools! Let's take a quick tour of the features.</p>
+                
+                <div class="tutorial-step">
+                    <h3><i class="fas fa-lock"></i> <span data-translate="encryption_tool">Encryption Tool</span></h3>
+                    <p data-translate="encryption_desc">Securely encrypt your sensitive messages with strong AES-256 encryption. Just enter your text, set a password, and click Encrypt.</p>
+                    <p data-translate="encryption_tip">Remember your password - you'll need it to decrypt the message later!</p>
+                </div>
+                
+                <div class="tutorial-step">
+                    <h3><i class="fas fa-redo"></i> <span data-translate="text_repeater">Text Repeater</span></h3>
+                    <p data-translate="repeater_desc">Generate repeated text patterns quickly. Useful for testing, creating patterns, or any situation where you need repeated text.</p>
+                </div>
+                
+                <div class="tutorial-step">
+                    <h3><i class="fas fa-file-archive"></i> <span data-translate="file_hider">File Hider</span></h3>
+                    <p data-translate="file_hider_desc">Hide any file inside another file (like an image) with password protection. Perfect for secure file sharing.</p>
+                </div>
+            </div>
+            <div class="popup-actions">
+                <button class="primary-btn" onclick="hidePopup('welcomePopup')">
+                    <i class="fas fa-check"></i> <span data-translate="get_started">Get Started</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Select Popup -->
+    <div id="languagePopup" class="popup-overlay">
+        <div class="popup-box">
+            <h2 class="popup-title" data-translate="select_language">Select Your Language</h2>
+            <div class="popup-content">
+                <p data-translate="language_choice">Please choose your preferred language:</p>
+                
+                <div class="language-options">
+                    <div class="language-option" onclick="setLanguage('en')">
+                        <i class="fas fa-language"></i>
+                        English
+                    </div>
+                    <div class="language-option" onclick="setLanguage('hi')">
+                        <i class="fas fa-language"></i>
+                        हिंदी (Hindi)
+                    </div>
+                    <div class="language-option" onclick="setLanguage('ur')">
+                        <i class="fas fa-language"></i>
+                        اردو (Urdu)
+                    </div>
+                    <div class="language-option" onclick="setLanguage('es')">
+                        <i class="fas fa-language"></i>
+                        Español (Spanish)
+                    </div>
+                    <div class="language-option" onclick="setLanguage('fr')">
+                        <i class="fas fa-language"></i>
+                        Français (French)
+                    </div>
+                </div>
+            </div>
+            <div class="popup-actions">
+                <button class="primary-btn" onclick="hidePopup('languagePopup')">
+                    <i class="fas fa-check"></i> <span data-translate="continue">Continue</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Preview Popup -->
+    <div id="filePreviewPopup" class="popup-overlay file-preview-popup">
+        <div class="popup-box">
+            <div class="file-preview-header">
+                <div class="file-preview-title" id="previewFileName">File Preview</div>
+                <button class="secondary-btn" onclick="hidePopup('filePreviewPopup')" style="padding: 0.5rem; min-width: auto;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="file-preview-content" id="previewFileContent">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+            <div class="file-preview-actions">
+                <button class="primary-btn" onclick="downloadPreviewFile()">
+                    <i class="fas fa-download"></i> Download
+                </button>
+                <button class="secondary-btn" onclick="hidePopup('filePreviewPopup')">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extracted File Preview Popup -->
+    <div id="extractedFilePopup" class="popup-overlay file-preview-popup">
+        <div class="popup-box">
+            <div class="file-preview-header">
+                <div class="file-preview-title" id="extractedFileName">Extracted File</div>
+                <button class="secondary-btn" onclick="hidePopup('extractedFilePopup')" style="padding: 0.5rem; min-width: auto;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="file-preview-content" id="extractedFileContent">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+            <div class="file-preview-actions">
+                <button class="primary-btn" onclick="downloadExtractedFile()">
+                    <i class="fas fa-download"></i> Download
+                </button>
+                <button class="secondary-btn" onclick="hidePopup('extractedFilePopup')">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast" class="toast"></div>
+
     <script>
-        // Game variables
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const startScreen = document.getElementById('startScreen');
-        const gameOverScreen = document.getElementById('gameOverScreen');
-        const startButton = document.getElementById('startButton');
-        const restartButton = document.getElementById('restartButton');
-        const scoreDisplay = document.getElementById('scoreDisplay');
-        const timerDisplay = document.getElementById('timerDisplay');
-        const comboDisplay = document.getElementById('comboDisplay');
-        const finalScore = document.getElementById('finalScore');
-        const highScore = document.getElementById('highScore');
-        const magnetIndicator = document.getElementById('magnetIndicator');
-        const slowmoIndicator = document.getElementById('slowmoIndicator');
-        const backgroundEffects = document.getElementById('backgroundEffects');
-        
-        let score = 0;
-        let highScoreValue = localStorage.getItem('highScore') || 0;
-        let timeLeft = 60;
-        let gameRunning = false;
-        let animationFrameId;
-        let timerId;
-        let objectSpawnInterval;
-        let comboCount = 0;
-        let comboMultiplier = 1;
-        let lastCaughtTime = 0;
-        let backgroundHue = 0;
-        
-        // Powerups
-        let magnetActive = false;
-        let magnetEndTime = 0;
-        let slowmoActive = false;
-        let slowmoEndTime = 0;
-        
-        // Player object
-        const player = {
-            x: canvas.width / 2 - 50,
-            y: canvas.height - 40,
-            width: 100,
-            height: 25,
-            color: '#4CAF50',
-            speed: 12,
-            dx: 0,
-            glow: 0,
-            glowDirection: 1
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBK9f-LIyV3_idvm5ehcShRHcqVFhHKu1g",
+            authDomain: "oneapp-2d719.firebaseapp.com",
+            databaseURL: "https://oneapp-2d719-default-rtdb.firebaseio.com",
+            projectId: "oneapp-2d719",
+            storageBucket: "oneapp-2d719.appspot.com",
+            messagingSenderId: "612978939501",
+            appId: "1:612978939501:web:05fb7bf4b62bc453c59164",
+            measurementId: "G-Q5GDGSQXRZ"
         };
-        
-        // Falling objects
-        let fallingObjects = [];
-        const objectTypes = [
-            { color: '#FF5252', score: 10, isBomb: false, name: 'Ruby' },    // Red circle
-            { color: '#FFEB3B', score: 20, isBomb: false, name: 'Topaz' },   // Yellow triangle
-            { color: '#2196F3', score: 30, isBomb: false, name: 'Sapphire' }, // Blue square
-            { color: '#9C27B0', score: 40, isBomb: false, name: 'Amethyst' }, // Purple pentagon
-            { color: '#000000', score: -50, isBomb: true, name: 'Bomb' },     // Black bomb
-            { color: '#00FFAA', score: 0, isBomb: false, isPowerup: true, effect: 'magnet', name: 'Magnet' }, // Green diamond (powerup)
-            { color: '#FF9800', score: 0, isBomb: false, isPowerup: true, effect: 'slowmo', name: 'Slow Mo' }  // Orange star (powerup)
-        ];
-        
-        // Background particles
-        let bgParticles = [];
-        
-        // Create background particles
-        function createBackgroundParticles() {
-            for (let i = 0; i < 50; i++) {
-                bgParticles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    size: Math.random() * 3 + 1,
-                    speed: Math.random() * 0.5 + 0.1,
-                    color: `hsl(${Math.random() * 360}, 70%, 50%)`,
-                    opacity: Math.random() * 0.3 + 0.1
-                });
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const analytics = firebase.analytics();
+
+        // Global variables
+        let historyData = JSON.parse(localStorage.getItem('textRepeaterHistory')) || [];
+        let currentTheme = localStorage.getItem('appTheme') || 'default';
+        let currentBgStyle = localStorage.getItem('bgStyle') || 'bubble';
+        let extractedFile = null;
+        let currentLanguage = localStorage.getItem('appLanguage') || 'en';
+        let firstTimeVisit = localStorage.getItem('firstTimeVisit') === null;
+        let previewFileData = null;
+        let extractedFileData = null;
+
+        // Language translations
+        const translations = {
+            en: {
+                // General
+                welcome_title: "Welcome to MagicWorld Pro+",
+                welcome_message: "Thank you for using our powerful tools! Let's take a quick tour of the features.",
+                get_started: "Get Started",
+                select_language: "Select Your Language",
+                language_choice: "Please choose your preferred language:",
+                continue: "Continue",
+                secure_encryption: "Secure Encryption",
+                text_repeater: "Text Repeater",
+                ultimate_file_hider: "Ultimate File Hider",
+                how_it_works: "How It Works",
+                hide_a_file: "Hide a File:",
+                hide_file_desc: "Select any carrier file and a file to hide inside it. Set a password and click 'Hide File' to download the new file with your secret file hidden inside.",
+                extract_a_file: "Extract a File:",
+                extract_file_desc: "Upload a file that has a hidden file inside it. Enter the correct password to extract and download the original hidden file.",
+                encryption_tool: "Encryption Tool",
+                encryption_desc: "Securely encrypt your sensitive messages with strong AES-256 encryption. Just enter your text, set a password, and click Encrypt.",
+                encryption_tip: "Remember your password - you'll need it to decrypt the message later!",
+                file_hider: "File Hider",
+                file_hider_desc: "Hide any file inside another file (like an image) with password protection. Perfect for secure file sharing.",
+                saved_history: "Saved History",
+                result: "Result",
+                copy: "Copy",
+                share: "Share",
+                clear: "Clear",
+                generate: "Generate",
+                save: "Save",
+                encrypt: "Encrypt",
+                decrypt: "Decrypt",
+                hide_file: "Hide File",
+                extract_file: "Extract File",
+                clear_options: "Clear Options",
+                what_to_clear: "What would you like to clear?",
+                text: "Text",
+                history: "History",
+                cancel: "Cancel",
+                decrypt_message: "Decrypt Message",
+                extract_hidden_file: "Extract Hidden File",
+                select_carrier_file: "Select carrier file (any type)",
+                select_file_to_hide: "Select file to hide",
+                select_hidden_file: "Select file with hidden content",
+                app_settings: "App Settings",
+                background_style: "Background Style",
+                bubble: "Bubble",
+                particle: "Particle",
+                wave: "Wave",
+                geometric: "Geometric",
+                color_theme: "Color Theme",
+                default: "Default",
+                pink: "Pink",
+                ocean: "Ocean",
+                green: "Green",
+                done: "Done"
+            },
+            hi: {
+                // Hindi translations
+                welcome_title: "मैजिकवर्ल्ड प्रो+ में आपका स्वागत है",
+                welcome_message: "हमारे शक्तिशाली टूल्स का उपयोग करने के लिए धन्यवाद! आइए सुविधाओं का एक त्वरित दौरा करें।",
+                get_started: "शुरू करें",
+                select_language: "अपनी भाषा चुनें",
+                language_choice: "कृपया अपनी पसंदीदा भाषा चुनें:",
+                continue: "जारी रखें",
+                secure_encryption: "सुरक्षित एन्क्रिप्शन",
+                text_repeater: "टेक्स्ट रिपीटर",
+                ultimate_file_hider: "अंतिम फाइल हिडर",
+                how_it_works: "यह कैसे काम करता है",
+                hide_a_file: "फाइल छिपाएं:",
+                hide_file_desc: "किसी भी कैरियर फाइल और उसमें छिपाने के लिए एक फाइल का चयन करें। एक पासवर्ड सेट करें और 'फाइल छिपाएं' पर क्लिक करें ताकि आपकी गुप्त फाइल छिपी हुई नई फाइल डाउनलोड हो जाए।",
+                extract_a_file: "फाइल निकालें:",
+                extract_file_desc: "एक ऐसी फाइल अपलोड करें जिसमें कोई छिपी हुई फाइल हो। मूल छिपी हुई फाइल को निकालने और डाउनलोड करने के लिए सही पासवर्ड दर्ज करें।",
+                encryption_tool: "एन्क्रिप्शन टूल",
+                encryption_desc: "मजबूत AES-256 एन्क्रिप्शन के साथ अपने संवेदनशील संदेशों को सुरक्षित रूप से एन्क्रिप्ट करें। बस अपना टेक्स्ट दर्ज करें, एक पासवर्ड सेट करें और एन्क्रिप्ट पर क्लिक करें।",
+                encryption_tip: "अपना पासवर्ड याद रखें - आपको बाद में संदेश को डिक्रिप्ट करने के लिए इसकी आवश्यकता होगी!",
+                file_hider: "फाइल हिडर",
+                file_hider_desc: "पासवर्ड सुरक्षा के साथ किसी अन्य फाइल (जैसे छवि) के अंदर किसी भी फाइल को छिपाएं। सुरक्षित फाइल साझा करने के लिए बिल्कुल सही।",
+                saved_history: "सहेजा गया इतिहास",
+                result: "परिणाम",
+                copy: "कॉपी",
+                share: "शेयर",
+                clear: "साफ",
+                generate: "जनरेट",
+                save: "सहेजें",
+                encrypt: "एन्क्रिप्ट",
+                decrypt: "डिक्रिप्ट",
+                hide_file: "फाइल छिपाएं",
+                extract_file: "फाइल निकालें",
+                clear_options: "साफ करने के विकल्प",
+                what_to_clear: "आप क्या साफ करना चाहेंगे?",
+                text: "टेक्स्ट",
+                history: "इतिहास",
+                cancel: "रद्द करें",
+                decrypt_message: "संदेश डिक्रिप्ट करें",
+                extract_hidden_file: "छिपी हुई फाइल निकालें",
+                                select_carrier_file: "कैरियर फाइल चुनें (किसी भी प्रकार की)",
+                select_file_to_hide: "छिपाने के लिए फाइल चुनें",
+                select_hidden_file: "छिपी हुई सामग्री वाली फाइल चुनें",
+                app_settings: "ऐप सेटिंग्स",
+                background_style: "पृष्ठभूमि शैली",
+                bubble: "बबल",
+                particle: "कण",
+                wave: "लहर",
+                geometric: "ज्यामितीय",
+                color_theme: "रंग थीम",
+                default: "डिफ़ॉल्ट",
+                pink: "गुलाबी",
+                ocean: "समुद्र",
+                green: "हरा",
+                done: "पूर्ण",
+                play: "चलाएं",
+                pause: "रोकें",
+                download: "डाउनलोड",
+                back: "वापस",
+                file_preview: "फाइल पूर्वावलोकन",
+                file_details: "फाइल विवरण",
+                file_name: "फाइल नाम",
+                file_type: "फाइल प्रकार",
+                file_size: "फाइल आकार",
+                last_modified: "अंतिम संशोधन",
+                extracted_file: "निकाली गई फाइल",
+                preview_not_available: "पूर्वावलोकन उपलब्ध नहीं",
+                file_corrupted: "फाइल खराब हो सकती है",
+                wrong_password: "गलत पासवर्ड",
+                try_again: "पुनः प्रयास करें"
+            },
+            ur: {
+                // Urdu translations
+                welcome_title: "میجک ورلڈ پرو+ میں خوش آمدید",
+                welcome_message: "ہمارے طاقتور ٹولز استعمال کرنے کا شکریہ! آئیے خصوصیات کا ایک مختصر دورہ کریں۔",
+                get_started: "شروع کریں",
+                select_language: "اپنی زبان منتخب کریں",
+                language_choice: "براہ کرم اپنی پسندیدہ زبان منتخب کریں:",
+                continue: "جاری رکھیں",
+                secure_encryption: "محفوظ خفیہ کاری",
+                text_repeater: "ٹیکسٹ ریپیٹر",
+                ultimate_file_hider: "آخری فائل چھپانے والا",
+                how_it_works: "یہ کیسے کام کرتا ہے",
+                hide_a_file: "فائل چھپائیں:",
+                hide_file_desc: "کسی بھی کیریئر فائل اور اس میں چھپانے کے لیے ایک فائل کا انتخاب کریں۔ ایک پاس ورڈ سیٹ کریں اور \"فائل چھپائیں\" پر کلک کریں تاکہ آپ کی خفیہ فائل چھپی ہوئی نئی فائل ڈاؤن لوڈ ہو جائے۔",
+                extract_a_file: "فائل نکالیں:",
+                extract_file_desc: "ایسی فائل اپ لوڈ کریں جس میں کوئی چھپی ہوئی فائل ہو۔ اصل چھپی ہوئی فائل کو نکالنے اور ڈاؤن لوڈ کرنے کے لیے صحیح پاس ورڈ درج کریں۔",
+                encryption_tool: "خفیہ کاری کا ٹول",
+                encryption_desc: "اپنے حساس پیغامات کو مضبوط AES-256 خفیہ کاری کے ساتھ محفوظ طریقے سے خفیہ کریں۔ بس اپنا متن درج کریں، ایک پاس ورڈ سیٹ کریں اور خفیہ کاری پر کلک کریں۔",
+                encryption_tip: "اپنا پاس ورڈ یاد رکھیں - آپ کو بعد میں پیغام کو ڈیکرپٹ کرنے کے لیے اس کی ضرورت ہوگی!",
+                file_hider: "فائل چھپانے والا",
+                file_hider_desc: "پاس ورڈ کی حفاظت کے ساتھ کسی دوسری فائل (جیسے تصویر) کے اندر کسی بھی فائل کو چھپائیں۔ محفوظ فائل شیئرنگ کے لیے بہترین۔",
+                saved_history: "محفوظ شدہ تاریخ",
+                result: "نتیجہ",
+                copy: "کاپی",
+                share: "شیئر",
+                clear: "صاف",
+                generate: "تولید",
+                save: "محفوظ",
+                encrypt: "خفیہ",
+                decrypt: "ڈکرپٹ",
+                hide_file: "فائل چھپائیں",
+                extract_file: "فائل نکالیں",
+                clear_options: "صاف کرنے کے اختیارات",
+                what_to_clear: "آپ کیا صاف کرنا چاہیں گے؟",
+                text: "ٹیکسٹ",
+                history: "تاریخ",
+                cancel: "منسوخ",
+                decrypt_message: "پیغام ڈکرپٹ کریں",
+                extract_hidden_file: "چھپی ہوئی فائل نکالیں",
+                select_carrier_file: "کیریئر فائل منتخب کریں (کسی بھی قسم کی)",
+                select_file_to_hide: "چھپانے کے لیے فائل منتخب کریں",
+                select_hidden_file: "چھپی ہوئی مواد کے ساتھ فائل منتخب کریں",
+                app_settings: "ایپ کی ترتیبات",
+                background_style: "پس منظر کی طرز",
+                bubble: "بلبلا",
+                particle: "ذرات",
+                wave: "لہر",
+                geometric: "جیومیٹرک",
+                color_theme: "رنگ تھیم",
+                default: "ڈیفالٹ",
+                pink: "گلابی",
+                ocean: "سمندر",
+                green: "سبز",
+                done: "ہو گیا",
+                play: "چلائیں",
+                pause: "روکیں",
+                download: "ڈاؤن لوڈ",
+                back: "واپس",
+                file_preview: "فائل پیش نظارہ",
+                file_details: "فائل کی تفصیلات",
+                file_name: "فائل کا نام",
+                file_type: "فائل کی قسم",
+                file_size: "فائل کا سائز",
+                last_modified: "آخری ترمیم",
+                extracted_file: "نکالی گئی فائل",
+                preview_not_available: "پیش نظارہ دستیاب نہیں",
+                file_corrupted: "فائل خراب ہو سکتی ہے",
+                wrong_password: "غلط پاس ورڈ",
+                try_again: "دوبارہ کوشش کریں"
+            },
+            es: {
+                // Spanish translations
+                welcome_title: "Bienvenido a MagicWorld Pro+",
+                welcome_message: "¡Gracias por usar nuestras poderosas herramientas! Hagamos un recorrido rápido por las características.",
+                get_started: "Empezar",
+                select_language: "Selecciona tu idioma",
+                language_choice: "Por favor elige tu idioma preferido:",
+                continue: "Continuar",
+                secure_encryption: "Encriptación segura",
+                text_repeater: "Repetidor de texto",
+                ultimate_file_hider: "Ocultador de archivos definitivo",
+                how_it_works: "Cómo funciona",
+                hide_a_file: "Ocultar un archivo:",
+                hide_file_desc: "Selecciona cualquier archivo portador y un archivo para ocultar dentro de él. Establece una contraseña y haz clic en 'Ocultar archivo' para descargar el nuevo archivo con tu archivo secreto oculto dentro.",
+                extract_a_file: "Extraer un archivo:",
+                extract_file_desc: "Sube un archivo que tenga un archivo oculto dentro. Ingresa la contraseña correcta para extraer y descargar el archivo oculto original.",
+                encryption_tool: "Herramienta de encriptación",
+                encryption_desc: "Encripta tus mensajes sensibles de forma segura con encriptación AES-256 fuerte. Solo ingresa tu texto, establece una contraseña y haz clic en Encriptar.",
+                encryption_tip: "¡Recuerda tu contraseña - la necesitarás para desencriptar el mensaje más tarde!",
+                file_hider: "Ocultador de archivos",
+                file_hider_desc: "Oculta cualquier archivo dentro de otro archivo (como una imagen) con protección por contraseña. Perfecto para compartir archivos de forma segura.",
+                saved_history: "Historial guardado",
+                result: "Resultado",
+                copy: "Copiar",
+                share: "Compartir",
+                clear: "Limpiar",
+                generate: "Generar",
+                save: "Guardar",
+                encrypt: "Encriptar",
+                decrypt: "Desencriptar",
+                hide_file: "Ocultar archivo",
+                extract_file: "Extraer archivo",
+                clear_options: "Opciones de limpieza",
+                what_to_clear: "¿Qué te gustaría limpiar?",
+                text: "Texto",
+                history: "Historial",
+                cancel: "Cancelar",
+                decrypt_message: "Desencriptar mensaje",
+                extract_hidden_file: "Extraer archivo oculto",
+                select_carrier_file: "Seleccionar archivo portador (cualquier tipo)",
+                select_file_to_hide: "Seleccionar archivo para ocultar",
+                select_hidden_file: "Seleccionar archivo con contenido oculto",
+                app_settings: "Configuración de la aplicación",
+                background_style: "Estilo de fondo",
+                bubble: "Burbuja",
+                particle: "Partícula",
+                wave: "Ola",
+                geometric: "Geométrico",
+                color_theme: "Tema de color",
+                default: "Predeterminado",
+                pink: "Rosa",
+                ocean: "Océano",
+                green: "Verde",
+                done: "Hecho",
+                play: "Reproducir",
+                pause: "Pausar",
+                download: "Descargar",
+                back: "Atrás",
+                file_preview: "Vista previa del archivo",
+                file_details: "Detalles del archivo",
+                file_name: "Nombre del archivo",
+                file_type: "Tipo de archivo",
+                file_size: "Tamaño del archivo",
+                last_modified: "Última modificación",
+                extracted_file: "Archivo extraído",
+                preview_not_available: "Vista previa no disponible",
+                file_corrupted: "Archivo podría estar dañado",
+                wrong_password: "Contraseña incorrecta",
+                try_again: "Intentar nuevamente"
+            },
+            fr: {
+                // French translations
+                welcome_title: "Bienvenue dans MagicWorld Pro+",
+                welcome_message: "Merci d'utiliser nos outils puissants ! Faisons un tour rapide des fonctionnalités.",
+                get_started: "Commencer",
+                select_language: "Sélectionnez votre langue",
+                language_choice: "Veuillez choisir votre langue préférée :",
+                continue: "Continuer",
+                secure_encryption: "Chiffrement sécurisé",
+                text_repeater: "Répéteur de texte",
+                ultimate_file_hider: "Cacheur de fichiers ultime",
+                how_it_works: "Comment ça marche",
+                hide_a_file: "Cacher un fichier :",
+                hide_file_desc: "Sélectionnez n'importe quel fichier porteur et un fichier à cacher à l'intérieur. Définissez un mot de passe et cliquez sur 'Cacher le fichier' pour télécharger le nouveau fichier avec votre fichier secret caché à l'intérieur.",
+                extract_a_file: "Extraire un fichier :",
+                extract_file_desc: "Téléchargez un fichier qui contient un fichier caché. Entrez le mot de passe correct pour extraire et télécharger le fichier caché original.",
+                encryption_tool: "Outil de chiffrement",
+                encryption_desc: "Chiffrez vos messages sensibles en toute sécurité avec un chiffrement AES-256 fort. Entrez simplement votre texte, définissez un mot de passe et cliquez sur Chiffrer.",
+                encryption_tip: "N'oubliez pas votre mot de passe - vous en aurez besoin pour déchiffrer le message plus tard !",
+                file_hider: "Cacheur de fichiers",
+                file_hider_desc: "Cachez n'importe quel fichier dans un autre fichier (comme une image) avec une protection par mot de passe. Parfait pour le partage sécurisé de fichiers.",
+                saved_history: "Historique enregistré",
+                result: "Résultat",
+                copy: "Copier",
+                share: "Partager",
+                clear: "Effacer",
+                generate: "Générer",
+                save: "Enregistrer",
+                encrypt: "Chiffrer",
+                decrypt: "Déchiffrer",
+                hide_file: "Cacher fichier",
+                extract_file: "Extraire fichier",
+                clear_options: "Options d'effacement",
+                what_to_clear: "Que souhaitez-vous effacer ?",
+                text: "Texte",
+                history: "Historique",
+                cancel: "Annuler",
+                decrypt_message: "Déchiffrer message",
+                extract_hidden_file: "Extraire fichier caché",
+                select_carrier_file: "Sélectionner fichier porteur (n'importe quel type)",
+                select_file_to_hide: "Sélectionner fichier à cacher",
+                select_hidden_file: "Sélectionner fichier avec contenu caché",
+                app_settings: "Paramètres de l'application",
+                background_style: "Style d'arrière-plan",
+                bubble: "Bulle",
+                particle: "Particule",
+                wave: "Vague",
+                geometric: "Géométrique",
+                color_theme: "Thème de couleur",
+                default: "Défaut",
+                pink: "Rose",
+                ocean: "Océan",
+                green: "Vert",
+                done: "Terminé",
+                play: "Lire",
+                pause: "Pause",
+                download: "Télécharger",
+                back: "Retour",
+                file_preview: "Aperçu du fichier",
+                file_details: "Détails du fichier",
+                file_name: "Nom du fichier",
+                file_type: "Type de fichier",
+                file_size: "Taille du fichier",
+                last_modified: "Dernière modification",
+                extracted_file: "Fichier extrait",
+                preview_not_available: "Aperçu non disponible",
+                file_corrupted: "Fichier peut être corrompu",
+                wrong_password: "Mot de passe incorrect",
+                try_again: "Réessayer"
+            }
+        };
+
+        // Constants for file hiding
+        const FILE_MARKER = "ADVANCED_FILE_HIDER_v3.0";
+        const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB chunks for large files
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set saved theme and background style
+            setTheme(currentTheme);
+            setBackgroundStyle(currentBgStyle);
+            
+            // Set language
+            setLanguage(currentLanguage);
+            
+            // Show welcome popup if first time visit
+            if (firstTimeVisit) {
+                showPopup('languagePopup');
+                localStorage.setItem('firstTimeVisit', 'false');
+            }
+            
+            // Load history
+            updateHistoryBox();
+            
+            // Animate elements
+            animateElements();
+            
+            // Setup file input listeners
+            setupFileInputs();
+            
+            // Initialize Firebase analytics
+            logFirebaseEvent('app_launched');
+        });
+
+        // Firebase analytics function
+        function logFirebaseEvent(eventName, eventParams = {}) {
+            try {
+                analytics.logEvent(eventName, eventParams);
+            } catch (e) {
+                console.error("Firebase analytics error:", e);
             }
         }
-        
-        // Update and draw background particles
-        function updateBackgroundParticles() {
-            backgroundHue = (backgroundHue + 0.2) % 360;
-            document.body.style.background = `hsl(${backgroundHue}, 80%, 5%)`;
+
+        // Set language function
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('appLanguage', lang);
             
-            bgParticles.forEach(p => {
-                p.y += p.speed;
-                if (p.y > canvas.height) {
-                    p.y = 0;
-                    p.x = Math.random() * canvas.width;
+            // Update all elements with data-translate attribute
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[lang] && translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                } else if (translations['en'][key]) {
+                    element.textContent = translations['en'][key];
                 }
-                
-                ctx.globalAlpha = p.opacity;
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 1;
+            });
+            
+            // Update current language display
+            document.getElementById('currentLanguage').textContent = lang.toUpperCase();
+            
+            // Update language checkmarks
+            document.querySelectorAll('.language-item i').forEach(icon => {
+                icon.style.display = 'none';
+            });
+            document.getElementById(`langCheck-${lang}`).style.display = 'inline-block';
+            
+            showToast(`Language set to ${lang}`, 'success');
+            logFirebaseEvent('language_changed', { language: lang });
+        }
+
+        // Set up file input event listeners
+        function setupFileInputs() {
+            document.getElementById('coverFile').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                document.getElementById('coverFileName').textContent = file.name;
+                document.getElementById('coverFileInfo').textContent = 
+                    `${formatFileSize(file.size)} • ${file.type}`;
+            });
+            
+            document.getElementById('secretFile').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                document.getElementById('secretFileName').textContent = file.name;
+                document.getElementById('secretFileInfo').textContent = 
+                    `${formatFileSize(file.size)} • ${file.type}`;
+            });
+            
+            document.getElementById('hiddenDataFile').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                document.getElementById('hiddenFileName').textContent = file.name;
             });
         }
-        
-        // Shapes for objects
-        function drawCircle(x, y, radius, color) {
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.fillStyle = color;
-            ctx.fill();
-            ctx.closePath();
-            
-            // Glow effect
-            if (!color.startsWith('rgba')) {
-                ctx.shadowColor = color;
-                ctx.shadowBlur = 15;
-                ctx.fill();
-                ctx.shadowBlur = 0;
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Toggle password visibility
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = event.currentTarget;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
             }
         }
-        
-        function drawTriangle(x, y, size, color) {
-            ctx.beginPath();
-            ctx.moveTo(x, y - size);
-            ctx.lineTo(x - size, y + size);
-            ctx.lineTo(x + size, y + size);
-            ctx.fillStyle = color;
-            ctx.fill();
-            ctx.closePath();
+
+        // Set background animation style
+        function setBackgroundStyle(style) {
+            currentBgStyle = style;
+            localStorage.setItem('bgStyle', style);
             
-            // Glow effect
-            ctx.shadowColor = color;
-            ctx.shadowBlur = 15;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-        }
-        
-        function drawSquare(x, y, size, color) {
-            ctx.fillStyle = color;
-            ctx.fillRect(x - size/2, y - size/2, size, size);
+            const bg = document.querySelector('.animated-bg');
+            bg.className = 'animated-bg ' + style + '-animation';
             
-            // Glow effect
-            ctx.shadowColor = color;
-            ctx.shadowBlur = 15;
-            ctx.fillRect(x - size/2, y - size/2, size, size);
-            ctx.shadowBlur = 0;
-        }
-        
-        function drawPentagon(x, y, size, color) {
-            ctx.beginPath();
-            for (let i = 0; i < 5; i++) {
-                const angle = (i * 2 * Math.PI / 5) - Math.PI/2;
-                ctx.lineTo(x + size * Math.cos(angle), y + size * Math.sin(angle));
-            }
-            ctx.closePath();
-            ctx.fillStyle = color;
-            ctx.fill();
+            // Clear existing elements
+            bg.innerHTML = '';
             
-            // Glow effect
-            ctx.shadowColor = color;
-            ctx.shadowBlur = 15;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-        }
-        
-        function drawDiamond(x, y, size, color) {
-            ctx.beginPath();
-            ctx.moveTo(x, y - size);
-            ctx.lineTo(x + size, y);
-            ctx.lineTo(x, y + size);
-            ctx.lineTo(x - size, y);
-            ctx.closePath();
-            ctx.fillStyle = color;
-            ctx.fill();
-            
-            // Glow effect
-            ctx.shadowColor = color;
-            ctx.shadowBlur = 15;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-        }
-        
-        function drawStar(x, y, size, color) {
-            ctx.beginPath();
-            for (let i = 0; i < 5; i++) {
-                const angle = (i * 2 * Math.PI / 5) - Math.PI/2;
-                ctx.lineTo(x + size * Math.cos(angle)), y + size * Math.sin(angle));
-                ctx.lineTo(x + size/2 * Math.cos(angle + Math.PI/5)), y + size/2 * Math.sin(angle + Math.PI/5));
-            }
-            ctx.closePath();
-            ctx.fillStyle = color;
-            ctx.fill();
-            
-            // Glow effect
-            ctx.shadowColor = color;
-            ctx.shadowBlur = 15;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-        }
-        
-        // Draw player (basket) with advanced effects
-        function drawPlayer() {
-            // Player glow animation
-            player.glow += player.glowDirection * 0.05;
-            if (player.glow > 1 || player.glow < 0) {
-                player.glowDirection *= -1;
+            // Create new elements based on style
+            switch(style) {
+                case 'bubble':
+                    createBubbles();
+                    break;
+                case 'particle':
+                    createParticles();
+                    break;
+                case 'wave':
+                    createWaves();
+                    break;
+                case 'geometric':
+                    createGeometricShapes();
+                    break;
             }
             
-            // Basket
-            ctx.beginPath();
-            ctx.moveTo(player.x, player.y);
-            ctx.lineTo(player.x + player.width, player.y);
-            ctx.lineTo(player.x + player.width - 20, player.y + player.height);
-            ctx.lineTo(player.x + 20, player.y + player.height);
-            ctx.closePath();
+            // Update active style indicator
+            document.querySelectorAll('.bg-style-option').forEach(option => {
+                option.classList.remove('active');
+                if (option.querySelector('i').className.includes(style)) {
+                    option.classList.add('active');
+                }
+            });
             
-            const gradient = ctx.createLinearGradient(player.x, player.y, player.x + player.width, player.y + player.height);
-            gradient.addColorStop(0, '#4CAF50');
-            gradient.addColorStop(1, '#8BC34A');
-            ctx.fillStyle = gradient;
-            ctx.fill();
-            
-            // Basket glow
-            ctx.shadowColor = `rgba(76, 175, 80, ${player.glow})`;
-            ctx.shadowBlur = 20;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            
-            // Basket lines with glow
-            ctx.strokeStyle = '#CDDC39';
-            ctx.lineWidth = 2;
-            for (let i = 0; i < 5; i++) {
-                ctx.beginPath();
-                ctx.moveTo(player.x + 20 + i * 15, player.y + player.height);
-                ctx.lineTo(player.x + i * 20, player.y);
-                ctx.stroke();
-            }
-            
-            // Magnet effect visualization
-            if (magnetActive) {
-                ctx.beginPath();
-                ctx.arc(player.x + player.width/2, player.y + player.height/2, 150, 0, Math.PI * 2);
-                const magnetGradient = ctx.createRadialGradient(
-                    player.x + player.width/2, player.y + player.height/2, 0,
-                    player.x + player.width/2, player.y + player.height/2, 150
-                );
-                magnetGradient.addColorStop(0, 'rgba(0, 255, 170, 0.3)');
-                magnetGradient.addColorStop(1, 'rgba(0, 255, 170, 0)');
-                ctx.fillStyle = magnetGradient;
-                ctx.fill();
+            showToast(`Background style set to ${style}`, 'success');
+            logFirebaseEvent('background_style_changed', { style: style });
+        }
+
+        // Create bubble elements
+        function createBubbles() {
+            const bg = document.querySelector('.animated-bg');
+            for (let i = 0; i < 8; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                const size = Math.random() * 150 + 50;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.top = `${Math.random() * 100}%`;
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.animationDelay = `${Math.random() * 10}s`;
+                bubble.style.background = `rgba(${Math.floor(Math.random() * 100)}, ${Math.floor(Math.random() * 100)}, ${Math.floor(Math.random() * 255)}, 0.1)`;
+                bg.appendChild(bubble);
             }
         }
-        
-        // Create new falling object
-        function createFallingObject() {
-            const type = Math.floor(Math.random() * objectTypes.length);
-            const size = Math.random() * 15 + 15;
-            const object = {
-                x: Math.random() * (canvas.width - size * 2) + size,
-                y: -size,
-                size: size,
-                speed: Math.random() * 4 + (slowmoActive ? 1 : 3),
-                type: type,
-                rotation: 0,
-                rotationSpeed: Math.random() * 0.1 - 0.05,
-                wiggle: Math.random() * Math.PI * 2,
-                wiggleSpeed: Math.random() * 0.05 + 0.02,
-                wiggleAmount: Math.random() * 10 + 5
+
+        // Create particle elements
+        function createParticles() {
+            const bg = document.querySelector('.animated-bg');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 10 + 5;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.top = `${Math.random() * 100 + 100}%`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 20}s`;
+                particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+                particle.style.background = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.random() * 0.3 + 0.1})`;
+                bg.appendChild(particle);
+            }
+        }
+
+        // Create wave elements
+        function createWaves() {
+            const bg = document.querySelector('.animated-bg');
+            for (let i = 1; i <= 3; i++) {
+                const wave = document.createElement('div');
+                wave.className = 'wave';
+                wave.style.animationDuration = `${10 + i * 2}s`;
+                bg.appendChild(wave);
+            }
+        }
+
+        // Create geometric shapes
+        function createGeometricShapes() {
+            const bg = document.querySelector('.animated-bg');
+            const shapes = ['triangle', 'circle', 'square'];
+            
+            for (let i = 0; i < 12; i++) {
+                const shape = document.createElement('div');
+                shape.className = 'shape ' + shapes[Math.floor(Math.random() * shapes.length)];
+                shape.style.top = `${Math.random() * 100}%`;
+                shape.style.left = `${Math.random() * 100}%`;
+                shape.style.animationDelay = `${Math.random() * 10}s`;
+                shape.style.animationDuration = `${Math.random() * 20 + 20}s`;
+                bg.appendChild(shape);
+            }
+        }
+
+        // Animate elements on load
+        function animateElements() {
+            const cards = document.querySelectorAll('.tool-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+        }
+
+        // Tool navigation
+        function showTool(toolId) {
+            document.querySelectorAll('.tool-container').forEach(tool => {
+                tool.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(toolId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            
+            logFirebaseEvent('tool_selected', { tool: toolId });
+        }
+
+        // Encryption functions
+        function encryptText() {
+            const text = document.getElementById('encryptInput').value.trim();
+            const password = document.getElementById('encryptPassword').value.trim();
+            
+            if (!text) {
+                showToast('Please enter text to encrypt', 'error');
+                return;
+            }
+            
+            if (!password) {
+                showToast('Please set an encryption password', 'error');
+                return;
+            }
+            
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner"></span> Encrypting...`;
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                try {
+                    // Generate a random salt
+                    const salt = CryptoJS.lib.WordArray.random(128/8);
+                    
+                    // Derive key using PBKDF2
+                    const key = CryptoJS.PBKDF2(password, salt, {
+                        keySize: 256/32,
+                        iterations: 1000
+                    });
+                    
+                    // Generate random IV
+                    const iv = CryptoJS.lib.WordArray.random(128/8);
+                    
+                    // Encrypt with AES-CBC
+                    const encrypted = CryptoJS.AES.encrypt(text, key, { 
+                        iv: iv,
+                        padding: CryptoJS.pad.Pkcs7,
+                        mode: CryptoJS.mode.CBC
+                    });
+                    
+                    // Combine salt + iv + ciphertext
+                    const result = salt.toString() + iv.toString() + encrypted.toString();
+                    
+                    document.getElementById('encryptOutput').value = result;
+                    showToast('Text encrypted successfully!', 'success');
+                    logFirebaseEvent('text_encrypted', { length: text.length });
+                } catch (error) {
+                    showToast('Encryption failed', 'error');
+                    console.error(error);
+                }
+                
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 800);
+        }
+
+        function showDecryptPopup() {
+            const encryptedText = document.getElementById('encryptInput').value.trim();
+            if (!encryptedText) {
+                showToast('Please enter text to decrypt', 'error');
+                return;
+            }
+            
+            showPopup('decryptPopup');
+        }
+
+        function decryptText() {
+            const encryptedText = document.getElementById('encryptInput').value.trim();
+            const password = document.getElementById('decryptPassword').value.trim();
+            
+            if (!password) {
+                showToast('Please enter decryption password', 'error');
+                return;
+            }
+            
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner"></span> Decrypting...`;
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                try {
+                    // Extract salt (first 32 chars)
+                    const salt = CryptoJS.enc.Hex.parse(encryptedText.substr(0, 32));
+                    
+                    // Extract IV (next 32 chars)
+                    const iv = CryptoJS.enc.Hex.parse(encryptedText.substr(32, 32));
+                    
+                    // Extract ciphertext (rest)
+                    const ciphertext = encryptedText.substring(64);
+                    
+                    // Derive key using same parameters
+                    const key = CryptoJS.PBKDF2(password, salt, {
+                        keySize: 256/32,
+                        iterations: 1000
+                    });
+                    
+                    // Decrypt
+                    const decrypted = CryptoJS.AES.decrypt(ciphertext, key, { 
+                        iv: iv,
+                        padding: CryptoJS.pad.Pkcs7,
+                        mode: CryptoJS.mode.CBC
+                    });
+                    
+                    const originalText = decrypted.toString(CryptoJS.enc.Utf8);
+                    
+                    if (!originalText) {
+                        throw new Error('Invalid password or encrypted text');
+                    }
+                    
+                    document.getElementById('encryptOutput').value = originalText;
+                    hidePopup('decryptPopup');
+                    showToast('Text decrypted successfully!', 'success');
+                    logFirebaseEvent('text_decrypted', { success: true });
+                } catch (error) {
+                    document.getElementById('encryptOutput').value = 'Invalid password or encrypted text!';
+                    showToast('Decryption failed', 'error');
+                    logFirebaseEvent('text_decrypted', { success: false });
+                }
+                
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 800);
+        }
+
+        // Text repeater functions
+        function repeatText() {
+            const text = document.getElementById('repeatInput').value.trim();
+            const count = parseInt(document.getElementById('repeatCount').value);
+            
+            if (!text) {
+                showToast('Please enter text to repeat', 'error');
+                return;
+            }
+            
+            if (!count || count < 1 || count > 1000) {
+                showToast('Please enter a valid count (1-1000)', 'error');
+                return;
+            }
+            
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner"></span> Generating...`;
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                const result = Array(count).fill(text).join(' ');
+                document.getElementById('repeatOutput').value = result;
+                showToast('Text repeated successfully!', 'success');
+                logFirebaseEvent('text_repeated', { count: count, length: text.length });
+                
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 500);
+        }
+
+        // History functions
+        function saveToHistory() {
+            const text = document.getElementById('repeatOutput').value.trim();
+            if (!text) {
+                showToast('Nothing to save', 'error');
+                return;
+            }
+            
+            // Add timestamp
+            const historyItem = {
+                text: text,
+                timestamp: new Date().toLocaleString()
             };
             
-            fallingObjects.push(object);
+            historyData.unshift(historyItem); // Add to beginning of array
+            if (historyData.length > 50) {
+                historyData = historyData.slice(0, 50); // Limit to 50 items
+            }
+            
+            localStorage.setItem('textRepeaterHistory', JSON.stringify(historyData));
+            updateHistoryBox();
+            showToast('Saved to history!', 'success');
+            logFirebaseEvent('history_saved', { length: text.length });
         }
-        
-        // Draw falling objects with advanced effects
-        function drawFallingObjects() {
-            fallingObjects.forEach(obj => {
-                const type = objectTypes[obj.type];
+
+        function updateHistoryBox() {
+            const historyBox = document.getElementById('historyBox');
+            
+            if (historyData.length === 0) {
+                historyBox.innerHTML = '<p style="text-align: center; color: #64748b; padding: 1rem;">No history yet</p>';
+                return;
+            }
+            
+            historyBox.innerHTML = historyData.map((item, index) => `
+                <div class="history-item" onclick="loadHistoryItem(${index})">
+                    <div class="history-text">${item.text.substring(0, 100)}${item.text.length > 100 ? '...' : ''}</div>
+                    <div class="history-time">${item.timestamp}</div>
+                </div>
+            `).join('');
+        }
+
+        function loadHistoryItem(index) {
+            const item = historyData[index];
+            document.getElementById('repeatInput').value = item.text;
+            document.getElementById('repeatOutput').value = item.text;
+            showToast('History item loaded', 'success');
+            logFirebaseEvent('history_item_loaded');
+        }
+
+        function clearHistory() {
+            historyData = [];
+            localStorage.removeItem('textRepeaterHistory');
+            updateHistoryBox();
+            showToast('History cleared', 'success');
+            logFirebaseEvent('history_cleared');
+        }
+
+        // File steganography functions
+        function showExtractPopup() {
+            showPopup('extractPopup');
+        }
+
+        // Show status message (styled for your app)
+        function showStatus(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+            element.style.padding = '0.8rem';
+            element.style.borderRadius = 'var(--border-radius)';
+            element.style.margin = '0.5rem 0';
+            
+            if (isError) {
+                element.style.background = 'rgba(239, 68, 68, 0.2)';
+                element.style.color = 'var(--error)';
+                element.style.border = '1px solid var(--error)';
+            } else {
+                element.style.background = 'rgba(74, 222, 128, 0.2)';
+                element.style.color = 'var(--success)';
+                element.style.border = '1px solid var(--success)';
+            }
+        }
+
+        // XOR encryption with better handling
+        function secureXOR(data, password) {
+            const result = new Uint8Array(data);
+            const pwBytes = new TextEncoder().encode(password);
+            const salt = new TextEncoder().encode("SALT_ADDED_FOR_SECURITY");
+            
+            for (let i = 0; i < result.length; i++) {
+                const keyByte = pwBytes[i % pwBytes.length] ^ salt[i % salt.length];
+                result[i] ^= keyByte;
+            }
+            return result;
+        }
+
+        // Process file to hide
+        async function processHideFile() {
+            const secretFile = document.getElementById('secretFile').files[0];
+            const coverFile = document.getElementById('coverFile').files[0];
+            const password = document.getElementById('hidePassword').value;
+            
+            // Validate inputs
+            if (!secretFile || !coverFile) {
+                showToast('Please select both files', 'error');
+                return;
+            }
+            if (!password || password.length < 4) {
+                showToast('Password must be at least 4 characters', 'error');
+                return;
+            }
+            
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner"></span> Processing...`;
+            btn.disabled = true;
+            
+            const progressContainer = document.getElementById('fileProgressContainer');
+            const progressBar = document.getElementById('hideProgress');
+            const statusElement = document.getElementById('hideStatus');
+            
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            statusElement.style.display = 'none';
+            
+            try {
+                showStatus('hideStatus', 'Preparing files...', false);
                 
-                ctx.save();
-                ctx.translate(obj.x + Math.sin(obj.wiggle) * obj.wiggleAmount, obj.y);
-                ctx.rotate(obj.rotation);
+                // Read cover file
+                const coverData = await readFileAsArrayBuffer(coverFile);
                 
-                if (type.isBomb) {
-                    // Draw bomb
-                    drawCircle(0, 0, obj.size, type.color);
-                    // Bomb fuse
-                    ctx.fillStyle = '#795548';
-                    ctx.fillRect(obj.size/2, -obj.size/2, 5, 10);
-                    // Spark animation
-                    if (Math.random() > 0.8) {
-                        ctx.fillStyle = `hsl(${Math.random() * 30 + 20}, 100%, 50%)`;
-                        ctx.beginPath();
-                        ctx.arc(obj.size/2 + 5, -obj.size/2, 3, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                } else if (type.isPowerup) {
-                    // Draw powerups
-                    if (type.effect === 'magnet') {
-                        drawDiamond(0, 0, obj.size, type.color);
-                        // Pulsing effect
-                        const pulse = Math.sin(Date.now() * 0.01) * 0.2 + 1;
-                        ctx.scale(pulse, pulse);
-                        drawDiamond(0, 0, obj.size, type.color);
-                    } else if (type.effect === 'slowmo') {
-                        drawStar(0, 0, obj.size, type.color);
-                        // Rotating effect
-                        ctx.rotate(Date.now() * 0.005);
-                        drawStar(0, 0, obj.size, type.color);
-                    }
-                } else {
-                    // Draw regular objects
-                    switch(obj.type) {
-                        case 0: // Circle
-                            drawCircle(0, 0, obj.size, type.color);
-                            break;
-                        case 1: // Triangle
-                            drawTriangle(0, 0, obj.size, type.color);
-                            break;
-                        case 2: // Square
-                            drawSquare(0, 0, obj.size * 1.5, type.color);
-                            break;
-                        case 3: // Pentagon
-                            drawPentagon(0, 0, obj.size, type.color);
-                            break;
-                    }
+                // Create metadata
+                const metadata = {
+                    name: secretFile.name,
+                    type: secretFile.type,
+                    size: secretFile.size,
+                    timestamp: Date.now()
+                };
+                
+                // Convert metadata to bytes with length prefix
+                const metadataStr = JSON.stringify(metadata);
+                const metadataBytes = new TextEncoder().encode(metadataStr);
+                const metadataLength = new Uint8Array(4);
+                new DataView(metadataLength.buffer).setUint32(0, metadataBytes.length);
+                
+                // Read secret file in chunks
+                const secretFileSize = secretFile.size;
+                let chunks = [];
+                let bytesProcessed = 0;
+                
+                while (bytesProcessed < secretFileSize) {
+                    const chunkStart = bytesProcessed;
+                    const chunkEnd = Math.min(chunkStart + CHUNK_SIZE, secretFileSize);
+                    const chunk = await readFileSliceAsArrayBuffer(secretFile, chunkStart, chunkEnd);
+                    
+                    // Encrypt the chunk
+                    const encryptedChunk = secureXOR(chunk, password);
+                    chunks.push(encryptedChunk);
+                    
+                    bytesProcessed = chunkEnd;
+                    progressBar.style.width = `${(bytesProcessed / secretFileSize) * 100}%`;
+                    showStatus('hideStatus', `Encrypting... ${Math.round((bytesProcessed / secretFileSize) * 100)}%`, false);
                 }
                 
-                ctx.restore();
+                // Combine all parts
+                const markerBytes = new TextEncoder().encode(FILE_MARKER);
+                const finalFile = new Uint8Array([
+                    ...new Uint8Array(coverData),
+                    ...markerBytes,
+                    ...metadataLength,
+                    ...metadataBytes,
+                    ...mergeUint8Arrays(chunks)
+                ]);
+                
+                // Store the file for preview
+                previewFileData = {
+                    data: finalFile,
+                    name: coverFile.name || "hidden_file.bin",
+                    type: coverFile.type
+                };
+                
+                // Show preview popup instead of direct download
+                showFilePreview(previewFileData);
+                
+                showStatus('hideStatus', 'File hidden successfully!', false);
+                progressBar.style.width = '100%';
+                showToast('File hidden successfully!', 'success');
+                logFirebaseEvent('file_hidden', { 
+                    coverType: coverFile.type,
+                    secretType: secretFile.type,
+                    secretSize: secretFile.size
+                });
+                
+            } catch (error) {
+                showStatus('hideStatus', `Error: ${error.message}`, true);
+                showToast('Error hiding file', 'error');
+                console.error("Hiding error:", error);
+                logFirebaseEvent('file_hide_error', { error: error.message });
+            }
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+
+        // Show file preview popup
+        function showFilePreview(fileData) {
+            const previewContent = document.getElementById('previewFileContent');
+            const fileNameElement = document.getElementById('previewFileName');
+            
+            // Clear previous content
+            previewContent.innerHTML = '';
+            fileNameElement.textContent = fileData.name;
+            
+            // Create file details
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'file-preview-details';
+            
+            detailsDiv.innerHTML = `
+                <div class="file-preview-detail">
+                    <span class="file-preview-detail-label">File Name:</span>
+                    <span class="file-preview-detail-value">${fileData.name}</span>
+                </div>
+                <div class="file-preview-detail">
+                    <span class="file-preview-detail-label">File Type:</span>
+                    <span class="file-preview-detail-value">${fileData.type || 'Unknown'}</span>
+                </div>
+                <div class="file-preview-detail">
+                    <span class="file-preview-detail-label">File Size:</span>
+                    <span class="file-preview-detail-value">${formatFileSize(fileData.data.length)}</span>
+                </div>
+            `;
+            
+            // Try to display the file content based on type
+            if (fileData.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.className = 'file-preview-media';
+                img.src = URL.createObjectURL(new Blob([fileData.data], { type: fileData.type }));
+                previewContent.appendChild(img);
+            } else if (fileData.type.startsWith('audio/')) {
+                const audio = document.createElement('audio');
+                audio.className = 'file-preview-audio';
+                audio.controls = true;
+                audio.src = URL.createObjectURL(new Blob([fileData.data], { type: fileData.type }));
+                previewContent.appendChild(audio);
+            } else if (fileData.type.startsWith('video/')) {
+                const video = document.createElement('video');
+                video.className = 'file-preview-video';
+                video.controls = true;
+                video.src = URL.createObjectURL(new Blob([fileData.data], { type: fileData.type }));
+                previewContent.appendChild(video);
+            } else {
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-file-alt';
+                icon.style.fontSize = '5rem';
+                icon.style.color = 'var(--primary-1)';
+                icon.style.margin = '1rem 0';
+                
+                const message = document.createElement('p');
+                message.textContent = 'Preview not available for this file type';
+                
+                previewContent.appendChild(icon);
+                previewContent.appendChild(message);
+            }
+            
+            previewContent.appendChild(detailsDiv);
+            showPopup('filePreviewPopup');
+        }
+
+        // Download file from preview popup
+        function downloadPreviewFile() {
+            if (!previewFileData) return;
+            
+            downloadFile(
+                previewFileData.data,
+                previewFileData.name,
+                previewFileData.type
+            );
+            
+            hidePopup('filePreviewPopup');
+            showToast('File downloaded!', 'success');
+            logFirebaseEvent('file_downloaded', { 
+                type: previewFileData.type,
+                size: previewFileData.data.length
             });
         }
-        
-        // Update falling objects with magnet effect
-        function updateFallingObjects() {
-            const now = Date.now();
+
+        // Process file extraction
+        async function processExtractFile() {
+            const hiddenFile = document.getElementById('hiddenDataFile').files[0];
+            const password = document.getElementById('extractPassword').value;
             
-            for (let i = fallingObjects.length - 1; i >= 0; i--) {
-                const obj = fallingObjects[i];
-                const type = objectTypes[obj.type];
+            // Validate inputs
+            if (!hiddenFile) {
+                showToast('Please select a file', 'error');
+                return;
+            }
+            if (!password) {
+                showToast('Password is required', 'error');
+                return;
+            }
+            
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner"></span> Extracting...`;
+            btn.disabled = true;
+            
+            const progressContainer = document.getElementById('extractProgressContainer');
+            const progressBar = document.getElementById('extractProgress');
+            const statusElement = document.getElementById('extractStatus');
+            
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            statusElement.style.display = 'none';
+            
+            try {
+                showStatus('extractStatus', 'Analyzing file...', false);
                 
-                // Update position
-                obj.y += obj.speed;
-                obj.rotation += obj.rotationSpeed;
-                obj.wiggle += obj.wiggleSpeed;
+                // Search for marker in chunks (to handle large files)
+                const fileSize = hiddenFile.size;
+                const markerBytes = new TextEncoder().encode(FILE_MARKER);
+                let markerPosition = -1;
                 
-                // Magnet effect
-                if (magnetActive && !type.isBomb && now < magnetEndTime) {
-                    const playerCenterX = player.x + player.width/2;
-                    const playerCenterY = player.y + player.height/2;
-                    const objCenterX = obj.x + Math.sin(obj.wiggle) * obj.wiggleAmount;
-                    const dx = playerCenterX - objCenterX;
-                    const dy = playerCenterY - obj.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < 150) {
-                        const force = 150 - distance;
-                        obj.x += dx * 0.05;
-                        obj.y += dy * 0.05;
-                    }
-                }
+                // Search backwards in 5MB chunks
+                const searchChunkSize = 5 * 1024 * 1024;
+                let searchPosition = Math.max(0, fileSize - searchChunkSize);
                 
-                // Check if object is caught by player
-                const objCenterX = obj.x + Math.sin(obj.wiggle) * obj.wiggleAmount;
-                if (obj.y + obj.size > player.y && 
-                    objCenterX > player.x && 
-                    objCenterX < player.x + player.width) {
+                while (searchPosition >= 0 && markerPosition === -1) {
+                    const chunk = await readFileSliceAsArrayBuffer(
+                        hiddenFile,
+                        searchPosition,
+                        Math.min(searchPosition + searchChunkSize + markerBytes.length, fileSize)
+                    );
                     
-                    // Handle powerups
-                    if (type.isPowerup) {
-                        if (type.effect === 'magnet') {
-                            magnetActive = true;
-                            magnetEndTime = now + 10000; // 10 seconds
-                            magnetIndicator.style.display = 'block';
-                            setTimeout(() => {
-                                magnetActive = false;
-                                magnetIndicator.style.display = 'none';
-                            }, 10000);
-                        } else if (type.effect === 'slowmo') {
-                            slowmoActive = true;
-                            slowmoEndTime = now + 8000; // 8 seconds
-                            slowmoIndicator.style.display = 'block';
-                            setTimeout(() => {
-                                slowmoActive = false;
-                                slowmoIndicator.style.display = 'none';
-                            }, 8000);
-                        }
-                    }
-                    
-                    // Update score
-                    if (!type.isPowerup) {
-                        score += type.score * comboMultiplier;
-                        scoreDisplay.textContent = `SCORE: ${score}`;
-                        
-                        // Combo system
-                        const currentTime = Date.now();
-                        if (currentTime - lastCaughtTime < 1000) { // 1 second window
-                            comboCount++;
-                            if (comboCount >= 3) {
-                                comboMultiplier = Math.min(5, Math.floor(comboCount / 3) + 1);
-                                comboDisplay.textContent = `COMBO x${comboMultiplier}`;
-                                comboDisplay.style.display = 'block';
+                    const chunkView = new Uint8Array(chunk);
+                    for (let i = 0; i <= chunkView.length - markerBytes.length; i++) {
+                        let match = true;
+                        for (let j = 0; j < markerBytes.length; j++) {
+                            if (chunkView[i + j] !== markerBytes[j]) {
+                                match = false;
+                                break;
                             }
-                        } else {
-                            comboCount = 1;
-                            comboMultiplier = 1;
-                            comboDisplay.style.display = 'none';
                         }
-                        lastCaughtTime = currentTime;
+                        if (match) {
+                            markerPosition = searchPosition + i;
+                            break;
+                        }
                     }
                     
-                    // Create particle effect when caught
-                    if (!type.isBomb) {
-                        createParticles(obj.x, obj.y, type.color, type.name);
-                    } else {
-                        // Explosion effect for bomb
-                        createExplosion(obj.x, obj.y);
-                    }
+                    searchPosition -= searchChunkSize;
+                    progressBar.style.width = `${((fileSize - searchPosition) / fileSize) * 50}%`;
+                }
+                
+                if (markerPosition === -1) {
+                    throw new Error("No hidden data found in this file");
+                }
+                
+                // Read metadata length (4 bytes after marker)
+                const metadataLengthBytes = await readFileSliceAsArrayBuffer(
+                    hiddenFile,
+                    markerPosition + markerBytes.length,
+                    markerPosition + markerBytes.length + 4
+                );
+                const metadataLength = new DataView(metadataLengthBytes).getUint32(0);
+                
+                // Read metadata
+                const metadataBytes = await readFileSliceAsArrayBuffer(
+                    hiddenFile,
+                    markerPosition + markerBytes.length + 4,
+                    markerPosition + markerBytes.length + 4 + metadataLength
+                );
+                const metadataStr = new TextDecoder().decode(metadataBytes);
+                const metadata = JSON.parse(metadataStr);
+                
+                // Read and decrypt file data in chunks
+                const hiddenDataStart = markerPosition + markerBytes.length + 4 + metadataLength;
+                const hiddenDataSize = metadata.size;
+                let decryptedChunks = [];
+                let bytesRead = 0;
+                
+                while (bytesRead < hiddenDataSize) {
+                    const chunkStart = hiddenDataStart + bytesRead;
+                    const chunkEnd = Math.min(chunkStart + CHUNK_SIZE, hiddenDataStart + hiddenDataSize);
+                    const encryptedChunk = await readFileSliceAsArrayBuffer(
+                        hiddenFile,
+                        chunkStart,
+                        chunkEnd
+                    );
                     
-                    fallingObjects.splice(i, 1);
-                    continue;
-                }
-                
-                // Remove if out of screen
-                if (obj.y > canvas.height + obj.size * 2) {
-                    fallingObjects.splice(i, 1);
-                    comboCount = 0;
-                    comboMultiplier = 1;
-                    comboDisplay.style.display = 'none';
-                }
-            }
-        }
-        
-        // Particles for caught objects
-        let particles = [];
-        
-        function createParticles(x, y, color, name) {
-            const particleCount = name === 'Amethyst' ? 30 : 20;
-            
-            for (let i = 0; i < particleCount; i++) {
-                particles.push({
-                    x: x,
-                    y: y,
-                    size: Math.random() * 5 + 2,
-                    color: color,
-                    speedX: Math.random() * 8 - 4,
-                    speedY: Math.random() * 8 - 4,
-                    life: 40,
-                    name: name,
-                    angle: Math.random() * Math.PI * 2,
-                    rotationSpeed: Math.random() * 0.2 - 0.1
-                });
-            }
-            
-            // Create floating text for score
-            if (name) {
-                particles.push({
-                    x: x,
-                    y: y - 30,
-                    text: `+${objectTypes.find(t => t.name === name).score * comboMultiplier}`,
-                    color: '#FFFFFF',
-                    speedY: -1,
-                    life: 60,
-                    size: 16 + comboMultiplier * 2
-                });
-            }
-        }
-        
-        function createExplosion(x, y) {
-            for (let i = 0; i < 60; i++) {
-                particles.push({
-                    x: x,
-                    y: y,
-                    size: Math.random() * 8 + 4,
-                    color: i % 3 === 0 ? '#FF5722' : (i % 3 === 1 ? '#FFC107' : '#FF0000'),
-                    speedX: Math.random() * 12 - 6,
-                    speedY: Math.random() * 12 - 6,
-                    life: 50,
-                    angle: 0,
-                    rotationSpeed: Math.random() * 0.3 - 0.15
-                });
-            }
-            
-            // Screen shake effect
-            canvas.style.transform = 'translate(5px, 5px)';
-            setTimeout(() => {
-                canvas.style.transform = 'translate(-5px, -5px)';
-                setTimeout(() => {
-                    canvas.style.transform = 'translate(0, 0)';
-                }, 50);
-            }, 50);
-        }
-        
-        function updateParticles() {
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.x += p.speedX;
-                p.y += p.speedY;
-                p.life--;
-                
-                if ('angle' in p) {
-                    p.angle += p.rotationSpeed || 0;
-                }
-                
-                if (p.life <= 0) {
-                    particles.splice(i, 1);
-                }
-            }
-        }
-        
-        function drawParticles() {
-            particles.forEach(p => {
-                const alpha = p.life / (p.text ? 60 : 40);
-                ctx.globalAlpha = alpha;
-                
-                if (p.text) {
-                    // Draw text particle
-                    ctx.font = `bold ${p.size}px Poppins`;
-                    ctx.fillStyle = p.color;
-                    ctx.textAlign = 'center';
-                    ctx.fillText(p.text, p.x, p.y);
-                } else {
-                    // Draw shape particle
-                    ctx.save();
-                    ctx.translate(p.x, p.y);
+                    const decryptedChunk = secureXOR(encryptedChunk, password);
+                    decryptedChunks.push(decryptedChunk);
                     
-                    if (p.name === 'Ruby') {
-                        ctx.rotate(p.angle);
-                        drawCircle(0, 0, p.size, p.color);
-                    } else if (p.name === 'Topaz') {
-                        ctx.rotate(p.angle);
-                        drawTriangle(0, 0, p.size, p.color);
-                    } else if (p.name === 'Sapphire') {
-                        ctx.rotate(p.angle);
-                        drawSquare(0, 0, p.size * 1.5, p.color);
-                    } else if (p.name === 'Amethyst') {
-                        ctx.rotate(p.angle);
-                        drawPentagon(0, 0, p.size, p.color);
-                    } else {
-                        // Explosion particles
-                        drawCircle(0, 0, p.size, p.color);
-                    }
-                    
-                    ctx.restore();
+                    bytesRead = chunkEnd - hiddenDataStart;
+                    progressBar.style.width = `${50 + (bytesRead / hiddenDataSize) * 50}%`;
+                    showStatus('extractStatus', `Decrypting... ${Math.round(50 + (bytesRead / hiddenDataSize) * 50)}%`, false);
                 }
                 
-                ctx.globalAlpha = 1;
+                // Combine all chunks
+                const finalFile = mergeUint8Arrays(decryptedChunks);
+                
+                // Store the extracted file for preview
+                extractedFileData = {
+                    data: finalFile,
+                    name: metadata.name,
+                    type: metadata.type
+                };
+                
+                // Show extracted file preview
+                showExtractedFilePreview(extractedFileData);
+                
+                showStatus('extractStatus', 'File extracted successfully!', false);
+                progressBar.style.width = '100%';
+                hidePopup('extractPopup');
+                showToast('File extracted successfully!', 'success');
+                logFirebaseEvent('file_extracted', {
+                    type: metadata.type,
+                    size: metadata.size
+                });
+                
+            } catch (error) {
+                showStatus('extractStatus', `Error: ${error.message}`, true);
+                showToast('Extraction failed. Wrong password or invalid file.', 'error');
+                console.error("Extraction error:", error);
+                logFirebaseEvent('file_extract_error', { error: error.message });
+            }
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+
+        // Show extracted file preview
+        function showExtractedFilePreview(fileData) {
+            const previewContent = document.getElementById('extractedFileContent');
+            const fileNameElement = document.getElementById('extractedFileName');
+            
+            // Clear previous content
+            previewContent.innerHTML = '';
+            fileNameElement.textContent = fileData.name;
+            
+            // Create file details
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'file-preview-details';
+            
+            detailsDiv.innerHTML = `
+                <div class="file-preview-detail">
+                    <span class="file-preview-detail-label">File Name:</span>
+                    <span class="file-preview-detail-value">${fileData.name}</span>
+                </div>
+                <div class="file-preview-detail">
+                    <span class="file-preview-detail-label">File Type:</span>
+                    <span class="file-preview-detail-value">${fileData.type || 'Unknown'}</span>
+                </div>
+                <div class="file-preview-detail">
+                    <span class="file-preview-detail-label">File Size:</span>
+                    <span class="file-preview-detail-value">${formatFileSize(fileData.data.length)}</span>
+                </div>
+            `;
+            
+            // Try to display the file content based on type
+            if (fileData.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.className = 'file-preview-media';
+                img.src = URL.createObjectURL(new Blob([fileData.data], { type: fileData.type }));
+                previewContent.appendChild(img);
+            } else if (fileData.type.startsWith('audio/')) {
+                const audio = document.createElement('audio');
+                audio.className = 'file-preview-audio';
+                audio.controls = true;
+                audio.src = URL.createObjectURL(new Blob([fileData.data], { type: fileData.type }));
+                previewContent.appendChild(audio);
+            } else if (fileData.type.startsWith('video/')) {
+                const video = document.createElement('video');
+                video.className = 'file-preview-video';
+                video.controls = true;
+                video.src = URL.createObjectURL(new Blob([fileData.data], { type: fileData.type }));
+                previewContent.appendChild(video);
+            } else {
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-file-alt';
+                icon.style.fontSize = '5rem';
+                icon.style.color = 'var(--primary-1)';
+                icon.style.margin = '1rem 0';
+                
+                const message = document.createElement('p');
+                message.textContent = 'Preview not available for this file type';
+                
+                previewContent.appendChild(icon);
+                previewContent.appendChild(message);
+            }
+            
+            previewContent.appendChild(detailsDiv);
+            showPopup('extractedFilePopup');
+        }
+
+        // Download extracted file
+        function downloadExtractedFile() {
+            if (!extractedFileData) return;
+            
+            downloadFile(
+                extractedFileData.data,
+                extractedFileData.name,
+                extractedFileData.type
+            );
+            
+            hidePopup('extractedFilePopup');
+            showToast('File downloaded!', 'success');
+            logFirebaseEvent('extracted_file_downloaded', {
+                type: extractedFileData.type,
+                size: extractedFileData.data.length
             });
         }
-        
-        // Update player position
-        function updatePlayer() {
-            player.x += player.dx;
-            
-            // Wall collision
-            if (player.x < 0) {
-                player.x = 0;
-            } else if (player.x + player.width > canvas.width) {
-                player.x = canvas.width - player.width;
-            }
+
+        // Helper functions for file operations
+        function readFileAsArrayBuffer(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error("Failed to read file"));
+                reader.readAsArrayBuffer(file);
+            });
         }
-        
-        // Clear canvas
-        function clear() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        function readFileSliceAsArrayBuffer(file, start, end) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error("Failed to read file slice"));
+                reader.readAsArrayBuffer(file.slice(start, end));
+            });
         }
-        
-        // Draw everything
-        function draw() {
-            clear();
-            
-            // Draw background particles
-            updateBackgroundParticles();
-            
-            // Draw falling objects
-            drawFallingObjects();
-            
-            // Draw player
-            drawPlayer();
-            
-            // Draw particles
-            drawParticles();
-            
-            // Draw powerup timers
-            const now = Date.now();
-            if (magnetActive && now < magnetEndTime) {
-                const timeLeft = ((magnetEndTime - now) / 1000).toFixed(1);
-                magnetIndicator.textContent = `MAGNET: ${timeLeft}s`;
+
+        function mergeUint8Arrays(arrays) {
+            const totalLength = arrays.reduce((sum, arr) => sum + arr.length, 0);
+            const result = new Uint8Array(totalLength);
+            let offset = 0;
+            for (const arr of arrays) {
+                result.set(arr, offset);
+                offset += arr.length;
             }
-            
-            if (slowmoActive && now < slowmoEndTime) {
-                const timeLeft = ((slowmoEndTime - now) / 1000).toFixed(1);
-                slowmoIndicator.textContent = `SLOW MO: ${timeLeft}s`;
-            }
+            return result;
         }
-        
-        // Game loop
-        function update() {
-            updatePlayer();
-            updateFallingObjects();
-            updateParticles();
-            draw();
-            
-            if (gameRunning) {
-                animationFrameId = requestAnimationFrame(update);
-            }
+
+        // Download file helper function
+        function downloadFile(data, filename, type) {
+            const blob = new Blob([data], { type: type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
-        
-        // Start game
-        function startGame() {
-            score = 0;
-            timeLeft = 60;
-            fallingObjects = [];
-            particles = [];
-            comboCount = 0;
-            comboMultiplier = 1;
-            magnetActive = false;
-            slowmoActive = false;
-            
-            scoreDisplay.textContent = `SCORE: ${score}`;
-            timerDisplay.textContent = `TIME: ${timeLeft}`;
-            comboDisplay.style.display = 'none';
-            magnetIndicator.style.display = 'none';
-            slowmoIndicator.style.display = 'none';
-            
-            startScreen.style.display = 'none';
-            gameOverScreen.style.display = 'none';
-            gameRunning = true;
-            
-            // Start object spawner
-            clearInterval(objectSpawnInterval);
-            objectSpawnInterval = setInterval(createFallingObject, 800);
-            
-            // Start timer
-            clearInterval(timerId);
-            timerId = setInterval(() => {
-                timeLeft--;
-                timerDisplay.textContent = `TIME: ${timeLeft}`;
-                
-                if (timeLeft <= 0) {
-                    endGame();
+
+        // Popup functions
+        function showPopup(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function hidePopup(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function showClearPopup() {
+            showPopup('clearPopup');
+        }
+
+        function showSettingsPopup() {
+            // Update active style indicator
+            document.querySelectorAll('.bg-style-option').forEach(option => {
+                option.classList.remove('active');
+                if (option.querySelector('i').className.includes(currentBgStyle)) {
+                    option.classList.add('active');
                 }
-            }, 1000);
+            });
             
-            update();
+            // Update active theme indicator
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('active');
+                if (option.textContent.toLowerCase() === currentTheme || 
+                    (currentTheme === 'default' && option.textContent === 'Default')) {
+                    option.classList.add('active');
+                }
+            });
+            
+            showPopup('settingsPopup');
         }
-        
-        // End game
-        function endGame() {
-            gameRunning = false;
-            clearInterval(timerId);
-            clearInterval(objectSpawnInterval);
-            cancelAnimationFrame(animationFrameId);
+
+        // Theme functions
+        function setTheme(theme) {
+            currentTheme = theme;
+            localStorage.setItem('appTheme', theme);
             
-            // Update high score
-            if (score > highScoreValue) {
-                highScoreValue = score;
-                localStorage.setItem('highScore', highScoreValue);
+            // Remove all theme classes
+            document.body.classList.remove('dark-mode', 'pink-theme', 'blue-theme', 'green-theme', 'orange-theme', 'purple-theme');
+            
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+            } else if (theme !== 'default') {
+                document.body.classList.add(`${theme}-theme`);
             }
             
-            finalScore.textContent = `Score: ${score}`;
-            highScore.textContent = `High Score: ${highScoreValue}`;
-            gameOverScreen.style.display = 'flex';
+            // Update theme colors
+            updateThemeColors(theme);
         }
-        
-        // Event listeners
-        startButton.addEventListener('click', startGame);
-        restartButton.addEventListener('click', startGame);
-        
-        // Keyboard controls
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight' || e.key === 'd') {
-                player.dx = player.speed;
-            } else if (e.key === 'ArrowLeft' || e.key === 'a') {
-                player.dx = -player.speed;
+
+        function updateThemeColors(theme) {
+            const root = document.documentElement;
+            
+            switch(theme) {
+                case 'pink':
+                    root.style.setProperty('--primary-1', '#f72585');
+                    root.style.setProperty('--primary-2', '#b5179e');
+                    break;
+                case 'blue':
+                    root.style.setProperty('--primary-1', '#4cc9f0');
+                    root.style.setProperty('--primary-2', '#4895ef');
+                    break;
+                case 'green':
+                    root.style.setProperty('--primary-1', '#4ade80');
+                    root.style.setProperty('--primary-2', '#38b000');
+                    break;
+                case 'orange':
+                    root.style.setProperty('--primary-1', '#f59e0b');
+                    root.style.setProperty('--primary-2', '#f97316');
+                    break;
+                case 'purple':
+                    root.style.setProperty('--primary-1', '#8b5cf6');
+                    root.style.setProperty('--primary-2', '#7c3aed');
+                    break;
+                default:
+                    root.style.setProperty('--primary-1', '#4361ee');
+                    root.style.setProperty('--primary-2', '#3a0ca3');
             }
-        });
-        
-        document.addEventListener('keyup', (e) => {
-            if ((e.key === 'ArrowRight' || e.key === 'd') && player.dx > 0) {
-                player.dx = 0;
-            } else if ((e.key === 'ArrowLeft' || e.key === 'a') && player.dx < 0) {
-                player.dx = 0;
+            
+            showToast(`Theme set to ${theme}`, 'success');
+            logFirebaseEvent('theme_changed', { theme: theme });
+        }
+
+        // Copy to clipboard function
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).value;
+            if (!text) {
+                showToast('Nothing to copy', 'error');
+                return;
             }
-        });
-        
-        // Mouse/touch controls
-        canvas.addEventListener('mousemove', (e) => {
-            if (gameRunning) {
-                const rect = canvas.getBoundingClientRect();
-                player.x = e.clientX - rect.left - player.width / 2;
+            
+            // Create a temporary textarea element
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'absolute';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            
+            // Select and copy the text
+            textarea.select();
+            document.execCommand('copy');
+            
+            // Clean up
+            document.body.removeChild(textarea);
+            
+            showToast('Copied to clipboard!', 'success');
+            logFirebaseEvent('copied_to_clipboard', { length: text.length });
+        }
+
+        // Share function
+        function shareResult(elementId) {
+            const text = document.getElementById(elementId).value;
+            if (!text) {
+                showToast('Nothing to share', 'error');
+                return;
             }
-        });
-        
-        canvas.addEventListener('touchmove', (e) => {
-            if (gameRunning) {
-                e.preventDefault();
-                const rect = canvas.getBoundingClientRect();
-                player.x = e.touches[0].clientX - rect.left - player.width / 2;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'MagicText Tools Pro+',
+                    text: text,
+                    url: window.location.href
+                }).catch(err => {
+                    console.log('Share canceled:', err);
+                });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                window.open(url, '_blank');
             }
-        }, { passive: false });
-        
-        // Initialize background particles
-        createBackgroundParticles();
+            
+            logFirebaseEvent('content_shared', { length: text.length });
+        }
+
+        // Clear fields function
+        function clearFields(fieldIds) {
+            fieldIds.forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            showToast('Fields cleared', 'success');
+            logFirebaseEvent('fields_cleared', { fields: fieldIds.join(',') });
+        }
+
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 
+                                  type === 'error' ? 'exclamation-circle' : 
+                                  'info-circle'}"></i>
+                ${message}
+            `;
+            
+            toast.className = `toast ${type}`;
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
     </script>
+    <!-- PASTE THIS SINGLE CODE BLOCK ANYWHERE BEFORE </body> TAG -->
+    <div id="developerPopup" class="popup-overlay">
+      <div class="popup-box" style="max-width:95%;width:400px;overflow:hidden;">
+        <div class="animated-developer-bg">
+          <div class="bg-particle"></div>
+          <div class="bg-particle" style="animation-delay:1s"></div>
+          <div class="bg-particle" style="animation-delay:2s"></div>
+        </div>
+        <div style="position:relative;z-index:2">
+          <h2 class="popup-title rainbow-text">About The Developer</h2>
+          <div class="developer-card">
+            <div class="developer-avatar pulse">
+              <i class="fas fa-user-secret"></i>
+            </div>
+            <h3>Mr Bheem Yadav</h3>
+            <p class="developer-tag">World's Most Popular Hacker and Developer</p>
+            <p><i class="fas fa-map-marker-alt"></i> From Kushinagar</p>
+            <div class="social-buttons">
+              <a href="https://instagram.com/Bheemyji" target="_blank" class="social-btn instagram">
+                <i class="fab fa-instagram"></i> Instagram
+              </a>
+              <a href="https://threads.net/@Bheemyji" target="_blank" class="social-btn threads">
+                <i class="fab fa-threads"></i> Threads
+              </a>
+              <a href="https://x.com/Bheemyadavji" target="_blank" class="social-btn twitter">
+                <i class="fab fa-x-twitter"></i> X( Twitter )
+              </a>
+            </div>
+          </div>
+          <div class="popup-actions">
+            <button class="primary-btn" onclick="toggleMusic()">
+              <i class="fas fa-music"></i> Toggle Music
+            </button>
+            <button class="secondary-btn" onclick="hidePopup('developerPopup')">
+              <i class="fas fa-times"></i> Close
+            </button>
+          </div>
+        </div>
+        <audio id="devMusic" loop style="display:none">
+          <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+    </div>
+
+    <style>
+      .animated-developer-bg {position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;z-index:1;border-radius:var(--border-radius)}
+      .bg-particle {position:absolute;width:100px;height:100px;background:rgba(67,97,238,0.15);border-radius:50%;animation:floatBubble 15s infinite linear;top:20%;left:10%}
+      @keyframes floatBubble {0%{transform:translateY(0) translateX(0) scale(0.5);opacity:0}20%{opacity:1}100%{transform:translateY(-100vh) translateX(50px) scale(1.2);opacity:0}}
+      .developer-card {background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);border-radius:var(--border-radius);padding:1.5rem;margin-bottom:1rem;text-align:center}
+      .developer-avatar {width:120px;height:120px;margin:0 auto 1rem;background:linear-gradient(45deg,#4361ee,#f72585,#4cc9f0);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 5px 20px rgba(0,0,0,0.2);border:3px solid white}
+      .developer-avatar i {font-size:50px;color:white}
+      .developer-tag {font-size:1.1rem;background:linear-gradient(to right,#f72585,#4361ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;animation:pulse 2s infinite;margin-bottom:1rem;position:relative;display:inline-block}
+      .developer-tag::after {content:'';position:absolute;bottom:-5px;left:0;width:100%;height:3px;background:linear-gradient(to right,#f72585,#4361ee);border-radius:3px}
+      .social-buttons {display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:1rem 0}
+      .social-btn {padding:8px 15px;border-radius:50px;color:white;text-decoration:none;display:flex;align-items:center;font-size:0.9rem;transition:all 0.3s;box-shadow:0 3px 10px rgba(0,0,0,0.1)}
+      .social-btn i {margin-right:8px}
+      .social-btn:hover {transform:translateY(-3px);box-shadow:0 5px 15px rgba(0,0,0,0.2)}
+      .instagram {background:linear-gradient(45deg,#405DE6,#833AB4,#C13584,#E1306C,#FD1D1D)}
+      .threads {background:linear-gradient(45deg,#000,#333,#666)}
+      .twitter {background:linear-gradient(45deg,#000,#1DA1F2)}
+    </style>
+
+    <script>
+    // Developer Section Functions
+    function showDeveloperPopup() {
+      showPopup('developerPopup');
+      try {
+        document.getElementById('devMusic').play();
+        showToast("Background music started", "success");
+      } catch(e) {
+        console.log("Auto-play prevented - user needs to interact first");
+      }
+    }
+
+    function toggleMusic() {
+      const music = document.getElementById('devMusic');
+      if(music.paused) {
+        music.play();
+        showToast("Music resumed", "success");
+      } else {
+        music.pause();
+        showToast("Music paused", "info");
+      }
+    }
+
+    // Add Developer button to navigation automatically
+    document.addEventListener('DOMContentLoaded', function() {
+      const nav = document.querySelector('.app-nav');
+      if(nav) {
+        const devBtn = document.createElement('button');
+        devBtn.className = 'nav-button';
+        devBtn.innerHTML = '<i class="fas fa-user-secret"></i><span>Developer</span>';
+        devBtn.onclick = showDeveloperPopup;
+        nav.appendChild(devBtn);
+      }
+    });
+    </script>
+         <!-- Admin Control System -->
+<div id="adminPopup" class="popup-overlay">
+  <div class="popup-box" style="max-width: 95%; width: 400px;">
+    <h2 class="popup-title">Admin Authentication</h2>
+    <div class="popup-content">
+      <div id="adminStep1">
+        <div class="password-input" style="margin-bottom: 1.5rem;">
+          <input type="password" id="adminPassword1" placeholder="Enter Primary Password">
+          <i class="fas fa-eye password-toggle" onclick="togglePasswordVisibility('adminPassword1')"></i>
+        </div>
+        <button class="primary-btn" onclick="verifyAdminPassword(1)" style="width: 100%;">
+          <i class="fas fa-lock"></i> Verify
+        </button>
+      </div>
+      <div id="adminStep2" style="display: none;">
+        <div class="password-input" style="margin-bottom: 1.5rem;">
+          <input type="password" id="adminPassword2" placeholder="Enter Secondary Password">
+          <i class="fas fa-eye password-toggle" onclick="togglePasswordVisibility('adminPassword2')"></i>
+        </div>
+        <button class="primary-btn" onclick="verifyAdminPassword(2)" style="width: 100%;">
+          <i class="fas fa-lock"></i> Final Verification
+        </button>
+      </div>
+    </div>
+    <button class="secondary-btn" onclick="hidePopup('adminPopup')" style="width: 100%; margin-top: 1rem;">
+      <i class="fas fa-times"></i> Cancel
+    </button>
+  </div>
+</div>
+
+<div id="adminStudio" class="popup-overlay">
+  <div class="popup-box" style="max-width: 95%; width: 95%; max-height: 90vh; overflow-y: auto;">
+    <div class="file-preview-header">
+      <div class="file-preview-title">Admin Control Panel</div>
+      <button class="secondary-btn" onclick="hidePopup('adminStudio')" style="padding: 0.5rem; min-width: auto;">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="admin-content">
+      <div class="admin-section">
+        <h3><i class="fas fa-users"></i> User Management</h3>
+        <div class="button-group">
+          <button class="primary-btn" onclick="getAllUsers()">
+            <i class="fas fa-sync"></i> Refresh Users
+          </button>
+          <button class="error-btn" onclick="clearUserData()">
+            <i class="fas fa-trash"></i> Clear All Data
+          </button>
+        </div>
+        <div id="userList" class="user-list">
+          <!-- Users will be listed here -->
+        </div>
+      </div>
+      
+      <div class="admin-section">
+        <h3><i class="fas fa-cog"></i> App Control</h3>
+        <div class="button-group">
+          <button class="primary-btn" onclick="forceUpdate()">
+            <i class="fas fa-cloud-download-alt"></i> Force Update
+          </button>
+          <button class="warning-btn" onclick="toggleMaintenanceMode()">
+            <i class="fas fa-tools"></i> Maintenance Mode
+          </button>
+          <button class="accent-btn" onclick="sendGlobalMessage()">
+            <i class="fas fa-bullhorn"></i> Broadcast Message
+          </button>
+        </div>
+      </div>
+      
+      <div class="admin-section">
+        <h3><i class="fas fa-shield-alt"></i> Security</h3>
+        <div class="button-group">
+          <button class="primary-btn" onclick="changeAdminPasswords()">
+            <i class="fas fa-key"></i> Change Passwords
+          </button>
+          <button class="error-btn" onclick="blockUser()">
+            <i class="fas fa-ban"></i> Block User
+          </button>
+        </div>
+      </div>
+      
+      <div class="admin-section">
+        <h3><i class="fas fa-chart-line"></i> Analytics</h3>
+        <div id="analyticsData" class="analytics-display">
+          <div class="analytics-item">
+            <i class="fas fa-users"></i>
+            <span>Total Users: <span id="totalUsers">0</span></span>
+          </div>
+          <div class="analytics-item">
+            <i class="fas fa-lock"></i>
+            <span>Encryptions Today: <span id="encryptionsToday">0</span></span>
+          </div>
+          <div class="analytics-item">
+            <i class="fas fa-redo"></i>
+            <span>Text Repeats: <span id="textRepeats">0</span></span>
+          </div>
+          <div class="analytics-item">
+            <i class="fas fa-file-archive"></i>
+            <span>Files Hidden: <span id="filesHidden">0</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden Admin Button -->
+<div id="adminAccessBtn" onclick="checkAdminAccess()">
+  <i class="fas fa-user-shield"></i>
+</div>
+
+<style>
+  /* Admin Button Styles */
+  #adminAccessBtn {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background: rgba(67, 97, 238, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 999;
+    transition: all 0.3s;
+    color: rgba(67, 97, 238, 0.7);
+    font-size: 18px;
+    border: 1px solid rgba(67, 97, 238, 0.3);
+  }
+  
+  #adminAccessBtn:hover {
+    background: rgba(67, 97, 238, 0.3);
+    color: rgba(67, 97, 238, 0.9);
+  }
+  
+  /* Admin Studio Styles */
+  .admin-content {
+    padding: 1rem;
+  }
+  
+  .admin-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px dashed #e2e8f0;
+  }
+  
+  .admin-section h3 {
+    color: var(--primary-1);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .admin-section h3 i {
+    margin-right: 0.5rem;
+  }
+  
+  .user-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--border-radius);
+    padding: 0.5rem;
+  }
+  
+  .user-item {
+    padding: 0.75rem;
+    border-radius: 8px;
+    background: rgba(67, 97, 238, 0.05);
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .user-item:hover {
+    background: rgba(67, 97, 238, 0.1);
+  }
+  
+  .user-actions button {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.8rem;
+    margin-left: 0.3rem;
+  }
+  
+  .analytics-display {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .analytics-item {
+    background: rgba(67, 97, 238, 0.05);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+  }
+  
+  .analytics-item i {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    color: var(--primary-1);
+  }
+  
+  /* Dark mode adjustments */
+  .dark-mode .admin-section {
+    border-bottom: 1px dashed #444;
+  }
+  
+  .dark-mode .user-list {
+    border-color: #444;
+  }
+  
+  .dark-mode .user-item {
+    background: rgba(67, 97, 238, 0.1);
+  }
+  
+  .dark-mode .user-item:hover {
+    background: rgba(67, 97, 238, 0.2);
+  }
+  
+  .dark-mode .analytics-item {
+    background: rgba(67, 97, 238, 0.1);
+  }
+</style>
+
+<script>
+  // Admin Control System
+  let adminClickCount = 0;
+  let adminClickTimeout;
+  const ADMIN_PASSWORDS = {
+    primary: "Bheem@123",  // Change these to your secure passwords
+    secondary: "Yadav@456"
+  };
+  
+  // Check for admin access (3 quick clicks)
+  function checkAdminAccess() {
+    adminClickCount++;
+    
+    if (adminClickTimeout) {
+      clearTimeout(adminClickTimeout);
+    }
+    
+    adminClickTimeout = setTimeout(() => {
+      adminClickCount = 0;
+    }, 1000);
+    
+    if (adminClickCount >= 3) {
+      adminClickCount = 0;
+      showPopup('adminPopup');
+      document.getElementById('adminStep1').style.display = 'block';
+      document.getElementById('adminStep2').style.display = 'none';
+      document.getElementById('adminPassword1').value = '';
+      document.getElementById('adminPassword2').value = '';
+    }
+  }
+  
+  // Verify admin passwords
+  function verifyAdminPassword(step) {
+    if (step === 1) {
+      const enteredPass = document.getElementById('adminPassword1').value;
+      if (enteredPass === ADMIN_PASSWORDS.primary) {
+        document.getElementById('adminStep1').style.display = 'none';
+        document.getElementById('adminStep2').style.display = 'block';
+        showToast("Primary password accepted", "success");
+      } else {
+        showToast("Incorrect primary password", "error");
+      }
+    } else if (step === 2) {
+      const enteredPass = document.getElementById('adminPassword2').value;
+      if (enteredPass === ADMIN_PASSWORDS.secondary) {
+        hidePopup('adminPopup');
+        showAdminStudio();
+        showToast("Admin access granted", "success");
+        logFirebaseEvent('admin_login_success');
+      } else {
+        showToast("Incorrect secondary password", "error");
+      }
+    }
+  }
+  
+  // Show admin studio
+  function showAdminStudio() {
+    showPopup('adminStudio');
+    loadAnalyticsData();
+    getAllUsers();
+  }
+  
+  // Load analytics data
+  function loadAnalyticsData() {
+    // Get data from Firebase
+    database.ref('analytics').once('value').then(snapshot => {
+      const data = snapshot.val() || {};
+      document.getElementById('totalUsers').textContent = data.totalUsers || 0;
+      document.getElementById('encryptionsToday').textContent = data.encryptionsToday || 0;
+      document.getElementById('textRepeats').textContent = data.textRepeats || 0;
+      document.getElementById('filesHidden').textContent = data.filesHidden || 0;
+    });
+  }
+  
+  // Get all users from Firebase
+  function getAllUsers() {
+    database.ref('users').once('value').then(snapshot => {
+      const users = snapshot.val() || {};
+      const userList = document.getElementById('userList');
+      userList.innerHTML = '';
+      
+      Object.keys(users).forEach(userId => {
+        const user = users[userId];
+        const userItem = document.createElement('div');
+        userItem.className = 'user-item';
+        userItem.innerHTML = `
+          <div>
+            <strong>${user.deviceId || 'Unknown Device'}</strong><br>
+            <small>Last Active: ${new Date(user.lastActive || 0).toLocaleString()}</small>
+          </div>
+          <div class="user-actions">
+            <button class="primary-btn" onclick="viewUserDetails('${userId}')">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="error-btn" onclick="blockUser('${userId}')">
+              <i class="fas fa-ban"></i>
+            </button>
+          </div>
+        `;
+        userList.appendChild(userItem);
+      });
+      
+      if (Object.keys(users).length === 0) {
+        userList.innerHTML = '<p style="text-align: center; padding: 1rem; color: #64748b;">No users found</p>';
+      }
+    });
+  }
+  
+  // View user details
+  function viewUserDetails(userId) {
+    database.ref('users/' + userId).once('value').then(snapshot => {
+      const user = snapshot.val();
+      const content = `
+        <h3>User Details</h3>
+        <div class="file-preview-details">
+          <div class="file-preview-detail">
+            <span class="file-preview-detail-label">Device ID:</span>
+            <span class="file-preview-detail-value">${user.deviceId || 'Unknown'}</span>
+          </div>
+          <div class="file-preview-detail">
+            <span class="file-preview-detail-label">Last Active:</span>
+            <span class="file-preview-detail-value">${new Date(user.lastActive || 0).toLocaleString()}</span>
+          </div>
+          <div class="file-preview-detail">
+            <span class="file-preview-detail-label">App Version:</span>
+            <span class="file-preview-detail-value">${user.appVersion || 'Unknown'}</span>
+          </div>
+          <div class="file-preview-detail">
+            <span class="file-preview-detail-label">Actions:</span>
+            <span class="file-preview-detail-value">
+              <button class="primary-btn" onclick="sendMessageToUser('${userId}')">
+                <i class="fas fa-envelope"></i> Message
+              </button>
+              <button class="error-btn" onclick="blockUser('${userId}')">
+                <i class="fas fa-ban"></i> Block
+              </button>
+            </span>
+          </div>
+        </div>
+      `;
+      
+      showCustomPopup('User Details', content);
+    });
+  }
+  
+  // Block a user
+  function blockUser(userId) {
+    if (!userId) {
+      userId = prompt("Enter User ID to block:");
+      if (!userId) return;
+    }
+    
+    if (confirm(`Are you sure you want to block user ${userId}?`)) {
+      database.ref('blockedUsers/' + userId).set(true).then(() => {
+        showToast(`User ${userId} blocked successfully`, "success");
+        logFirebaseEvent('user_blocked', { userId: userId });
+      });
+    }
+  }
+  
+  // Force update all clients
+  function forceUpdate() {
+    const newVersion = prompt("Enter new version number:", "1.0.0");
+    if (!newVersion) return;
+    
+    const updateMessage = prompt("Enter update message:", "New version available. Please update.");
+    
+    database.ref('appUpdates/latestVersion').set({
+      version: newVersion,
+      message: updateMessage,
+      timestamp: Date.now(),
+      forceUpdate: confirm("Force update? (Cancel for optional update)")
+    }).then(() => {
+      showToast("Update command sent to all users", "success");
+      logFirebaseEvent('force_update_issued', { version: newVersion });
+    });
+  }
+  
+  // Toggle maintenance mode
+  function toggleMaintenanceMode() {
+    database.ref('maintenanceMode').once('value').then(snapshot => {
+      const currentMode = snapshot.val();
+      const newMode = !currentMode;
+      
+      database.ref('maintenanceMode').set(newMode).then(() => {
+        showToast(`Maintenance mode ${newMode ? 'enabled' : 'disabled'}`, "success");
+        logFirebaseEvent('maintenance_mode_toggled', { enabled: newMode });
+      });
+    });
+  }
+  
+  // Send global message
+  function sendGlobalMessage() {
+    const message = prompt("Enter message to broadcast to all users:");
+    if (!message) return;
+    
+    database.ref('globalMessages').push({
+      message: message,
+      timestamp: Date.now(),
+      from: "Admin"
+    }).then(() => {
+      showToast("Message broadcasted to all users", "success");
+      logFirebaseEvent('global_message_sent');
+    });
+  }
+  
+  // Clear all user data
+  function clearUserData() {
+    if (confirm("WARNING: This will delete ALL user data. Continue?")) {
+      database.ref('users').remove().then(() => {
+        showToast("All user data cleared", "success");
+        getAllUsers();
+        logFirebaseEvent('all_user_data_cleared');
+      });
+    }
+  }
+  
+  // Change admin passwords
+  function changeAdminPasswords() {
+    const currentPrimary = prompt("Enter current primary password:");
+    if (currentPrimary !== ADMIN_PASSWORDS.primary) {
+      showToast("Incorrect primary password", "error");
+      return;
+    }
+    
+    const currentSecondary = prompt("Enter current secondary password:");
+    if (currentSecondary !== ADMIN_PASSWORDS.secondary) {
+      showToast("Incorrect secondary password", "error");
+      return;
+    }
+    
+    const newPrimary = prompt("Enter new primary password:");
+    const newSecondary = prompt("Enter new secondary password:");
+    
+    if (newPrimary && newSecondary) {
+      ADMIN_PASSWORDS.primary = newPrimary;
+      ADMIN_PASSWORDS.secondary = newSecondary;
+      showToast("Admin passwords changed successfully", "success");
+      logFirebaseEvent('admin_passwords_changed');
+    }
+  }
+  
+  // Helper function to show custom popup
+  function showCustomPopup(title, content) {
+    const popup = document.createElement('div');
+    popup.className = 'popup-overlay active';
+    popup.innerHTML = `
+      <div class="popup-box" style="max-width: 95%; width: 400px;">
+        <div class="file-preview-header">
+          <div class="file-preview-title">${title}</div>
+          <button class="secondary-btn" onclick="this.closest('.popup-overlay').remove()" style="padding: 0.5rem; min-width: auto;">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="popup-content" style="padding: 1rem;">
+          ${content}
+        </div>
+      </div>
+    `;
+    document.body.appendChild(popup);
+  }
+</script>
 </body>
 </html>
